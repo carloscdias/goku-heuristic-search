@@ -16,9 +16,83 @@ void initGL() {
   glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
+//
+static void drawGrid() {
+  float i;
+
+  glColor3f(0.8f, 0.8f, 0.8f);
+  glLineWidth(1.0f);
+  glBegin(GL_LINES);
+
+  for(i = 0; i < MAP_SIZE; i++) {
+    glVertex2f(0, i);
+    glVertex2f(MAP_SIZE, i);
+    glVertex2f(i, 0);
+    glVertex2f(i, MAP_SIZE);
+  }
+
+  glEnd();
+}
+
+// 
+static void drawUnitSquare(float x, float y, float red, float green, float blue) {
+  glColor3f(red, green, blue);
+  glVertex2f(x, y);
+  glVertex2f(x + 1, y);
+  glVertex2f(x + 1, y + 1);
+  glVertex2f(x, y + 1);
+}
+
+// 
+static void drawMap() {
+  float x, y, red, green, blue;
+
+  glBegin(GL_QUADS);
+
+  for(x = 0; x < MAP_SIZE; x++) {
+    for(y = 0; y < MAP_SIZE; y++) {
+      switch(MAP[(byte)x][(byte)y]) {
+        case 'G':
+          red = 0.0f;
+          green = 1.0f;
+          blue = 0.0f;
+          break;
+        case 'M':
+          red = 1.0f;
+          green = 0.5f;
+          blue = 0.5f;
+          break;
+        case 'A':
+          red = 0.0f;
+          green = 0.0f;
+          blue = 1.0f;
+          break;
+        default:
+          red = green = blue = 0.0f;
+          printf("Strange character: %d\n", MAP[(byte)x][(byte)y]);
+      }
+
+      drawUnitSquare(x, MAP_SIZE - y - 1, red, green, blue);
+    }
+  }
+
+  glEnd();
+}
+
+//
+static void drawGoku() {
+  glBegin(GL_QUADS);
+  drawUnitSquare(Goku.x, Goku.y, 1.0f, 0.0f, 0.0f);
+  glEnd();
+}
+
 // Funcao pra desenhar a tela
 void display() {
   glClear(GL_COLOR_BUFFER_BIT);
+  drawMap();
+  drawGoku();
+  drawGrid();
+  glutSwapBuffers();
 }
 
 // Funcao para redesenhar a tela
@@ -42,7 +116,7 @@ void initMap(char *filename)
         count_line++;
         count_col = 0;
       } else {
-        MAP[count_col][count_line] = (char)c;
+        MAP[count_col][count_line] = (byte)c;
         count_col++;
       }
     }
@@ -57,10 +131,8 @@ void initAgent(Position2D *position) {
     Goku.x = position->x;
     Goku.y = position->y;
   } else {
-    // Randomize position
-    initRand();
-    Goku.x = (byte)(rand() % MAP_SIZE);
-    Goku.y = (byte)(rand() % MAP_SIZE);
+    Goku.x = 19;
+    Goku.y = 22;
   }
 }
 
