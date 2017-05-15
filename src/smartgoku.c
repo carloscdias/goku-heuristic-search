@@ -1,7 +1,13 @@
 #include <stdlib.h>
 #include <smartgoku.h>
+#ifdef __APPLE__ && __MACH__
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#endif
+#ifdef __gnu_linux__
 #include <GL/gl.h>
 #include <GL/freeglut.h>
+#endif
 
 #define OK  0 
 

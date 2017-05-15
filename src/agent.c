@@ -1,8 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#ifdef __APPLE__ && __MACH__
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#endif
+#ifdef __gnu_linux__
 #include <GL/gl.h>
 #include <GL/freeglut.h>
+#endif
 #include <smartgoku.h>
 
 // Init rand with current time
