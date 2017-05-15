@@ -195,7 +195,13 @@ static byte getPathCost(char currentState) {
 }
 
 // Controls
-void controls(unsigned char key, int x, int y) {
+void controls(unsigned char key, int xScreen, int yScreen) {
+  byte x, y;
+
+  // Old values
+  x = Goku.x;
+  y = Goku.y;
+
   switch(key) {
     case GLUT_KEY_UP:
       moveUp();
@@ -211,9 +217,11 @@ void controls(unsigned char key, int x, int y) {
       break;
   }
 
-  currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
-
-  glutPostRedisplay();
+  if((x != Goku.x) || (y != Goku.y)) {
+    // Moved
+    currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
+    glutPostRedisplay();
+  }
 }
 
 // Read map from file
