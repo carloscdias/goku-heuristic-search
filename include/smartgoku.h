@@ -6,6 +6,10 @@
 #define DRAGON_RADAR_DISTANCE 3
 #define TEXT_BUFFER           50
 
+#define GRASS_COST            1
+#define WATER_COST            10
+#define MOUNTAIN_COST         60
+
 typedef unsigned char byte;
 
 typedef struct {
@@ -16,6 +20,7 @@ extern byte MAP[MAP_SIZE][MAP_SIZE];
 extern Position2D Goku;
 extern Position2D Dragonballs[DRAGONBALLS_NUMBER];
 extern char text[TEXT_BUFFER];
+extern unsigned int currentTotalCost;
 
 void initMap(char *);
 void initAgent(Position2D *);
@@ -28,6 +33,6 @@ void moveDown();
 
 void initGL();
 void display();
-void reshape();
+void controls(unsigned char, int, int);
 
 #endif

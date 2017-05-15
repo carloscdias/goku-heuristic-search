@@ -155,11 +155,11 @@ static void drawDragonRadar() {
 static void drawInterestingPoints() {
 }
 
-//
+// Draw info on screen
 static void drawText() {
   byte i, length;
 
-  sprintf(text, "Custo: %d - Posicao: (%d, %d)", 0, Goku.x, Goku.y);
+  sprintf(text, "Custo: %d - Posicao: (%d, %d)", currentTotalCost, Goku.x, Goku.y);
   length = strlen(text);
 
   //glColor3f(0.0f, 0.0f, 0.0f);
@@ -180,6 +180,40 @@ void display() {
   drawDragonRadar();
   drawText();
   glutSwapBuffers();
+}
+
+// Path cost
+static byte getPathCost(char currentState) {
+  switch(currentState) {
+    case 'G': return GRASS_COST;
+    case 'A': return WATER_COST;
+    case 'M': return MOUNTAIN_COST;
+  }
+
+  // return max value of unsigned
+  return -1;
+}
+
+// Controls
+void controls(unsigned char key, int x, int y) {
+  switch(key) {
+    case GLUT_KEY_UP:
+      moveUp();
+      break;
+    case GLUT_KEY_DOWN:
+      moveDown();
+      break;
+    case GLUT_KEY_LEFT:
+      moveLeft();
+      break;
+    case GLUT_KEY_RIGHT:
+      moveRight();
+      break;
+  }
+
+  currentTotalCost += getPathCost(MAP[(byte) Goku.x][(byte) MAP_SIZE - Goku.y - 1]);
+
+  glutPostRedisplay();
 }
 
 // Read map from file
@@ -244,22 +278,22 @@ void moveLeft() {
 
 // Move agent right one time
 void moveRight() {
-  if (Goku.x < MAP_SIZE) {
+  if (Goku.x < MAP_SIZE - 1) {
     Goku.x++;
   }
 }
 
 // Move agent up one time
 void moveUp() {
-  if (Goku.y > 0) {
-    Goku.y--;
+  if (Goku.y < MAP_SIZE - 1) {
+    Goku.y++;
   }
 }
 
 // Move agent down one time
 void moveDown() {
-  if (Goku.y < MAP_SIZE) {
-    Goku.y++;
+  if (Goku.y > 0) {
+    Goku.y--;
   }
 }
 

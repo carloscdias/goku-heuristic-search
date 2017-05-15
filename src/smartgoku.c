@@ -20,6 +20,8 @@ byte MAP[MAP_SIZE][MAP_SIZE];
 
 char text[TEXT_BUFFER];
 
+unsigned int currentTotalCost = 0;
+
 // Main function
 int main(int argc, char *argv[], char *envp[]) {	
   glutInit(&argc, argv);
@@ -28,6 +30,8 @@ int main(int argc, char *argv[], char *envp[]) {
   glutInitWindowPosition(350, 50);
   glutCreateWindow("Smart Goku");
   glutDisplayFunc(display);
+  glutKeyboardFunc(controls);
+  glutSpecialFunc(controls);
 
   initMap("Mapa01.txt");
   initAgent(NULL);
