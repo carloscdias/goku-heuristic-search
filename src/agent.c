@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #ifdef __APPLE__ && __MACH__
 #include <OpenGL/gl.h>
@@ -156,12 +157,15 @@ static void drawInterestingPoints() {
 
 //
 static void drawText() {
-  byte i;
+  byte i, length;
+
+  sprintf(text, "Custo: %d - Posicao: (%d, %d)", 0, Goku.x, Goku.y);
+  length = strlen(text);
 
   //glColor3f(0.0f, 0.0f, 0.0f);
   glRasterPos2f(0.0f, MAP_SIZE - 1);
 
-  for(i = 0; i < TEXT_BUFFER; i++) {
+  for(i = 0; i < length; i++) {
     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
   }
 }

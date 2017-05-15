@@ -29,8 +29,6 @@ int main(int argc, char *argv[], char *envp[]) {
   glutCreateWindow("Smart Goku");
   glutDisplayFunc(display);
 
-  sprintf(text, "Inicio - %d", 1);
-
   initMap("Mapa01.txt");
   initAgent(NULL);
   initDragonballs(NULL);
