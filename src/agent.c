@@ -82,7 +82,7 @@ static void drawMap() {
           printf("Strange character: %d\n", MAP[(byte)x][(byte)y]);
       }
 
-      drawUnitSquare(x, MAP_SIZE - y - 1, red, green, blue);
+      drawUnitSquare(x, y, red, green, blue);
     }
   }
 
@@ -211,7 +211,7 @@ void controls(unsigned char key, int x, int y) {
       break;
   }
 
-  currentTotalCost += getPathCost(MAP[(byte) Goku.x][(byte) MAP_SIZE - Goku.y - 1]);
+  currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
 
   glutPostRedisplay();
 }
@@ -220,7 +220,7 @@ void controls(unsigned char key, int x, int y) {
 void initMap(char *filename)
 {
   int c;
-  int count_line = 0;
+  int count_line = MAP_SIZE - 1;
   int count_col = 0;
   FILE *file;
 
@@ -229,7 +229,7 @@ void initMap(char *filename)
   if (file) {
     while ((c = getc(file)) != EOF) {
       if (count_col == MAP_SIZE) {
-        count_line++;
+        count_line--;
         count_col = 0;
       } else {
         MAP[count_col][count_line] = (byte)c;
