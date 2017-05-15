@@ -3,6 +3,7 @@
 
 #define MAP_SIZE              42
 #define DRAGONBALLS_NUMBER    7
+#define DRAGON_RADAR_DISTANCE 3
 
 typedef unsigned char byte;
 

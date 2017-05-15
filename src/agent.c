@@ -5,22 +5,25 @@
 #include <GL/freeglut.h>
 #include <smartgoku.h>
 
-// Funcao para inicializar o rand com a hora atual do sistema
+// Init rand with current time
 static void initRand() {
   time_t t;
   srand((unsigned) time(&t));
 }
 
-// Funcao para inicializar o openGL
+// Init openGL
 void initGL() {
-  glClearColor(0.0, 0.0, 0.0, 1.0);
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluOrtho2D(0, MAP_SIZE, 0, MAP_SIZE);
 }
 
-//
+// Draw grid
 static void drawGrid() {
   float i;
 
-  glColor3f(0.8f, 0.8f, 0.8f);
+  glColor3f(0.0f, 0.0f, 0.0f);
   glLineWidth(1.0f);
   glBegin(GL_LINES);
 
@@ -34,7 +37,7 @@ static void drawGrid() {
   glEnd();
 }
 
-// 
+// Helper function to draw a unit square
 static void drawUnitSquare(float x, float y, float red, float green, float blue) {
   glColor3f(red, green, blue);
   glVertex2f(x, y);
@@ -43,7 +46,7 @@ static void drawUnitSquare(float x, float y, float red, float green, float blue)
   glVertex2f(x, y + 1);
 }
 
-// 
+// Draw map
 static void drawMap() {
   float x, y, red, green, blue;
 
@@ -53,19 +56,19 @@ static void drawMap() {
     for(y = 0; y < MAP_SIZE; y++) {
       switch(MAP[(byte)x][(byte)y]) {
         case 'G':
-          red = 0.0f;
-          green = 1.0f;
-          blue = 0.0f;
+          red = 0.5703125f;
+          green = 0.8125f;
+          blue = 0.3125f;
           break;
         case 'M':
-          red = 1.0f;
-          green = 0.5f;
-          blue = 0.5f;
+          red = 0.578125f;
+          green = 0.5390625f;
+          blue = 0.328125f;
           break;
         case 'A':
-          red = 0.0f;
-          green = 0.0f;
-          blue = 1.0f;
+          red = 0.328125f;
+          green = 0.55078125f;
+          blue = 0.828125f;
           break;
         default:
           red = green = blue = 0.0f;
@@ -79,28 +82,84 @@ static void drawMap() {
   glEnd();
 }
 
-//
+// Draw agent goku
 static void drawGoku() {
   glBegin(GL_QUADS);
-  drawUnitSquare(Goku.x, Goku.y, 1.0f, 0.0f, 0.0f);
+  drawUnitSquare(Goku.x, Goku.y, 0.75f, 0.3125f, 0.30078125f);
   glEnd();
 }
 
-// Funcao pra desenhar a tela
+// Draw dragonballs
+static void drawDragonballs() {
+  byte i;
+
+  glBegin(GL_QUADS);
+  
+  for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
+    drawUnitSquare(Dragonballs[i].x, Dragonballs[i].y, 0.98828125f, 0.60546875f, 0.02734375f);
+  }
+
+  glEnd();
+}
+
+// Draw the dragon radar view
+static void drawDragonRadar() {
+  // Draw white surface
+  /*
+  glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
+
+  glBegin(GL_QUADS);
+
+  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y - DRAGON_RADAR_DISTANCE);
+
+  glEnd();
+  */
+
+  // Draw edge lines
+
+  glColor3f(0.625f, 0.0f, 0.0f);
+  glLineWidth(1.5f);
+
+  glBegin(GL_LINES);
+
+  // Up
+  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+
+  // Down
+  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y - DRAGON_RADAR_DISTANCE);
+
+  // Left
+  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+
+  // Right
+  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+
+  glEnd();
+}
+
+// Draw points from which the whole map can be seen by the dragon radar
+static void drawInterestingPoints() {
+}
+
+// Draw screen
 void display() {
   glClear(GL_COLOR_BUFFER_BIT);
   drawMap();
+  drawDragonballs();
   drawGoku();
   drawGrid();
+  drawDragonRadar();
   glutSwapBuffers();
 }
 
-// Funcao para redesenhar a tela
-void reshape(int w, int h) {
-  glViewport(0, 0, w, h);
-}
-
-// Funcao para ler o mapa de um arquivo
+// Read map from file
 void initMap(char *filename)
 {
   int c;
@@ -125,7 +184,7 @@ void initMap(char *filename)
   }
 }
 
-// Funcao para inicializar o agente
+// Init agent position
 void initAgent(Position2D *position) {
   if (position != NULL) {
     Goku.x = position->x;
@@ -136,7 +195,7 @@ void initAgent(Position2D *position) {
   }
 }
 
-// Funcao para inicializar as esferas do dragao
+// Init dragonballs position
 void initDragonballs(Position2D *positions[]) {
   byte i;
 
@@ -153,28 +212,28 @@ void initDragonballs(Position2D *positions[]) {
   }
 }
 
-/*Funcao para mover o agente para esquerda uma vez*/
+// Move agent left one time
 void moveLeft() {
   if (Goku.x > 0) {
     Goku.x--;
   }
 }
 
-/*Funcao para mover o agente para direita uma vez*/
+// Move agent right one time
 void moveRight() {
   if (Goku.x < MAP_SIZE) {
     Goku.x++;
   }
 }
 
-/*Funcao para mover o agente para cima uma vez*/
+// Move agent up one time
 void moveUp() {
   if (Goku.y > 0) {
     Goku.y--;
   }
 }
 
-/*Funcao para mover o agente para baixo uma vez*/
+// Move agent down one time
 void moveDown() {
   if (Goku.y < MAP_SIZE) {
     Goku.y++;
