@@ -154,6 +154,18 @@ static void drawDragonRadar() {
 static void drawInterestingPoints() {
 }
 
+//
+static void drawText() {
+  byte i;
+
+  //glColor3f(0.0f, 0.0f, 0.0f);
+  glRasterPos2f(0.0f, MAP_SIZE - 1);
+
+  for(i = 0; i < TEXT_BUFFER; i++) {
+    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+  }
+}
+
 // Draw screen
 void display() {
   glClear(GL_COLOR_BUFFER_BIT);
@@ -162,6 +174,7 @@ void display() {
   drawGoku();
   drawGrid();
   drawDragonRadar();
+  drawText();
   glutSwapBuffers();
 }
 

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <smartgoku.h>
 #ifdef __APPLE__ && __MACH__
 #include <OpenGL/gl.h>
@@ -17,6 +18,8 @@ Position2D Dragonballs[DRAGONBALLS_NUMBER];
 
 byte MAP[MAP_SIZE][MAP_SIZE];
 
+char text[TEXT_BUFFER];
+
 // Main function
 int main(int argc, char *argv[], char *envp[]) {	
   glutInit(&argc, argv);
@@ -25,6 +28,8 @@ int main(int argc, char *argv[], char *envp[]) {
   glutInitWindowPosition(350, 50);
   glutCreateWindow("Smart Goku");
   glutDisplayFunc(display);
+
+  sprintf(text, "Inicio - %d", 1);
 
   initMap("Mapa01.txt");
   initAgent(NULL);

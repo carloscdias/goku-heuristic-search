@@ -4,6 +4,7 @@
 #define MAP_SIZE              42
 #define DRAGONBALLS_NUMBER    7
 #define DRAGON_RADAR_DISTANCE 3
+#define TEXT_BUFFER           30
 
 typedef unsigned char byte;
 
@@ -14,6 +15,7 @@ typedef struct {
 extern byte MAP[MAP_SIZE][MAP_SIZE];
 extern Position2D Goku;
 extern Position2D Dragonballs[DRAGONBALLS_NUMBER];
+extern char text[TEXT_BUFFER];
 
 void initMap(char *);
 void initAgent(Position2D *);
