@@ -44,6 +44,7 @@ void initBoard() {
   board.showInfo = 1;
   board.showDragonballs = 0;
   board.showGrid = 1;
+  board.showDragonRadar = 1;
   board.currentTotalCost = 0;
 }
 
@@ -91,6 +92,10 @@ void configs(unsigned char key, int x, int y) {
     case 'i':
       // Toggle information
       toggle(&board.showInfo);
+      break;
+    case 'r':
+      // Toggle radar
+      toggle(&board.showDragonRadar);
       break;
     case ' ':
       // Restart
@@ -190,6 +195,8 @@ void moveDown() {
 // Init openGL
 void initGL() {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluOrtho2D(0, MAP_SIZE, 0, MAP_SIZE);
@@ -214,8 +221,8 @@ static void drawGrid() {
 }
 
 // Helper function to draw a unit square
-static void drawUnitSquare(float x, float y, float red, float green, float blue) {
-  glColor3f(red, green, blue);
+static void drawUnitSquare(float x, float y, float red, float green, float blue, float alpha) {
+  glColor4f(red, green, blue, alpha);
   glVertex2f(x, y);
   glVertex2f(x + 1, y);
   glVertex2f(x + 1, y + 1);
@@ -251,7 +258,7 @@ static void drawMap() {
           printf("Strange character: %d\n", MAP[(byte)x][(byte)y]);
       }
 
-      drawUnitSquare(x, y, red, green, blue);
+      drawUnitSquare(x, y, red, green, blue, 1.0f);
     }
   }
 
@@ -261,7 +268,7 @@ static void drawMap() {
 // Draw agent goku
 static void drawGoku() {
   glBegin(GL_QUADS);
-  drawUnitSquare(Goku.x, Goku.y, 0.75f, 0.3125f, 0.30078125f);
+  drawUnitSquare(Goku.x, Goku.y, 0.75f, 0.3125f, 0.30078125f, 1.0f);
   glEnd();
 }
 
@@ -272,7 +279,7 @@ static void drawDragonballs() {
   glBegin(GL_QUADS);
   
   for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
-    drawUnitSquare(Dragonballs[i].x, Dragonballs[i].y, 0.98828125f, 0.60546875f, 0.02734375f);
+    drawUnitSquare(Dragonballs[i].x, Dragonballs[i].y, 0.98828125f, 0.60546875f, 0.02734375f, 0.8f);
   }
 
   glEnd();
@@ -281,7 +288,6 @@ static void drawDragonballs() {
 // Draw the dragon radar view
 static void drawDragonRadar() {
   // Draw white surface
-  /*
   glColor4f(1.0f, 1.0f, 1.0f, 0.3f);
 
   glBegin(GL_QUADS);
@@ -292,7 +298,6 @@ static void drawDragonRadar() {
   glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y - DRAGON_RADAR_DISTANCE);
 
   glEnd();
-  */
 
   // Draw edge lines
 
@@ -345,16 +350,18 @@ void display() {
   // Draw visible dragonballs
   drawDragonballs();
 
-  // Draw agent
-  drawGoku();
-
   // Draw grid
   if(board.showGrid) {
     drawGrid();
   }
 
   // Draw radar
-  drawDragonRadar();
+  if(board.showDragonRadar) {
+    drawDragonRadar();
+  }
+
+  // Draw agent
+  drawGoku();
 
   // Draw info
   if(board.showInfo) {

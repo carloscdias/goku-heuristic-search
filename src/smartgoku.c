@@ -25,7 +25,7 @@ BoardSetup board;
 // Main function
 int main(int argc, char *argv[], char *envp[]) {	
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
   glutInitWindowSize(630, 630);
   glutInitWindowPosition(350, 50);
   glutCreateWindow("Smart Goku");

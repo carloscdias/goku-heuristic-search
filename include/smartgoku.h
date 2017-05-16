@@ -17,7 +17,7 @@ typedef struct {
 } Position2D;
 
 typedef struct {
-  byte showGrid, showDragonballs, showInfo;
+  byte showGrid, showDragonballs, showInfo, showDragonRadar;
   unsigned int currentTotalCost;
   Position2D lastPosition;
 } BoardSetup;
