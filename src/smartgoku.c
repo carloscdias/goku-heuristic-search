@@ -20,7 +20,7 @@ byte MAP[MAP_SIZE][MAP_SIZE];
 
 char text[TEXT_BUFFER];
 
-unsigned int currentTotalCost = 0;
+BoardSetup board;
 
 // Main function
 int main(int argc, char *argv[], char *envp[]) {	
@@ -30,9 +30,10 @@ int main(int argc, char *argv[], char *envp[]) {
   glutInitWindowPosition(350, 50);
   glutCreateWindow("Smart Goku");
   glutDisplayFunc(display);
-  glutKeyboardFunc(controls);
+  glutKeyboardFunc(configs);
   glutSpecialFunc(controls);
 
+  initBoard();
   initMap("Mapa01.txt");
   initAgent(NULL);
   initDragonballs(NULL);

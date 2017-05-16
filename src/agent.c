@@ -18,6 +18,175 @@ static void initRand() {
   srand((unsigned) time(&t));
 }
 
+// Helper to toggle a value
+static void toggle(byte *value) {
+  if (*value == 0) {
+    *value = 1;
+  } else {
+    *value = 0;
+  }
+}
+
+// Path cost
+static byte getPathCost(char currentState) {
+  switch(currentState) {
+    case 'G': return GRASS_COST;
+    case 'A': return WATER_COST;
+    case 'M': return MOUNTAIN_COST;
+  }
+
+  // return max value of unsigned
+  return -1;
+}
+
+// Init board
+void initBoard() {
+  board.showInfo = 1;
+  board.showDragonballs = 0;
+  board.showGrid = 1;
+  board.currentTotalCost = 0;
+}
+
+// Controls
+void controls(int key, int xScreen, int yScreen) {
+  byte x, y;
+
+  // Old values
+  x = Goku.x;
+  y = Goku.y;
+
+  switch(key) {
+    case GLUT_KEY_UP:
+      moveUp();
+      break;
+    case GLUT_KEY_DOWN:
+      moveDown();
+      break;
+    case GLUT_KEY_LEFT:
+      moveLeft();
+      break;
+    case GLUT_KEY_RIGHT:
+      moveRight();
+      break;
+  }
+
+  if((x != Goku.x) || (y != Goku.y)) {
+    // Moved
+    board.currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
+    glutPostRedisplay();
+  }
+}
+
+// Config controls
+void configs(unsigned char key, int x, int y) {
+  switch(key) {
+    case 'g':
+      // Toggle grid display
+      toggle(&board.showGrid);
+      break;
+    case 'd':
+      // Toggle "God Mode"
+      toggle(&board.showDragonballs);
+      break;
+    case 'i':
+      // Toggle information
+      toggle(&board.showInfo);
+      break;
+    case ' ':
+      // Restart
+      initBoard();
+      initDragonballs(NULL);
+      initAgent(NULL);
+      break;
+  }
+
+  glutPostRedisplay();
+}
+
+// Read map from file
+void initMap(char *filename)
+{
+  int c;
+  int count_line = MAP_SIZE - 1;
+  int count_col = 0;
+  FILE *file;
+
+  file = fopen(filename, "r");
+  
+  if (file) {
+    while ((c = getc(file)) != EOF) {
+      if (count_col == MAP_SIZE) {
+        count_line--;
+        count_col = 0;
+      } else {
+        MAP[count_col][count_line] = (byte)c;
+        count_col++;
+      }
+    }
+
+    fclose(file);
+  }
+}
+
+// Init agent position
+void initAgent(Position2D *position) {
+  if (position != NULL) {
+    Goku.x = position->x;
+    Goku.y = position->y;
+  } else {
+    Goku.x = 19;
+    Goku.y = 22;
+  }
+}
+
+// Init dragonballs position
+void initDragonballs(Position2D *positions[]) {
+  byte i;
+
+  initRand();
+
+  for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
+    if(positions != NULL && positions[i] != NULL) {
+      Dragonballs[i].x = positions[i]->x;
+      Dragonballs[i].y = positions[i]->y;
+    } else {
+      Dragonballs[i].x = (byte)(rand() % MAP_SIZE);
+      Dragonballs[i].y = (byte)(rand() % MAP_SIZE);
+    }
+  }
+}
+
+// Move agent left one time
+void moveLeft() {
+  if (Goku.x > 0) {
+    Goku.x--;
+  }
+}
+
+// Move agent right one time
+void moveRight() {
+  if (Goku.x < MAP_SIZE - 1) {
+    Goku.x++;
+  }
+}
+
+// Move agent up one time
+void moveUp() {
+  if (Goku.y < MAP_SIZE - 1) {
+    Goku.y++;
+  }
+}
+
+// Move agent down one time
+void moveDown() {
+  if (Goku.y > 0) {
+    Goku.y--;
+  }
+}
+
+/*
+ * Drawing functions
+ */
 // Init openGL
 void initGL() {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -151,15 +320,11 @@ static void drawDragonRadar() {
   glEnd();
 }
 
-// Draw points from which the whole map can be seen by the dragon radar
-static void drawInterestingPoints() {
-}
-
 // Draw info on screen
 static void drawText() {
   byte i, length;
 
-  sprintf(text, "Custo: %d - Posicao: (%d, %d)", currentTotalCost, Goku.x, Goku.y);
+  sprintf(text, "Custo: %d - Posicao: (%d, %d)", board.currentTotalCost, Goku.x, Goku.y);
   length = strlen(text);
 
   //glColor3f(0.0f, 0.0f, 0.0f);
@@ -173,135 +338,29 @@ static void drawText() {
 // Draw screen
 void display() {
   glClear(GL_COLOR_BUFFER_BIT);
+
+  // Draw map
   drawMap();
+
+  // Draw visible dragonballs
   drawDragonballs();
+
+  // Draw agent
   drawGoku();
-  drawGrid();
+
+  // Draw grid
+  if(board.showGrid) {
+    drawGrid();
+  }
+
+  // Draw radar
   drawDragonRadar();
-  drawText();
+
+  // Draw info
+  if(board.showInfo) {
+    drawText();
+  }
+
   glutSwapBuffers();
-}
-
-// Path cost
-static byte getPathCost(char currentState) {
-  switch(currentState) {
-    case 'G': return GRASS_COST;
-    case 'A': return WATER_COST;
-    case 'M': return MOUNTAIN_COST;
-  }
-
-  // return max value of unsigned
-  return -1;
-}
-
-// Controls
-void controls(unsigned char key, int xScreen, int yScreen) {
-  byte x, y;
-
-  // Old values
-  x = Goku.x;
-  y = Goku.y;
-
-  switch(key) {
-    case GLUT_KEY_UP:
-      moveUp();
-      break;
-    case GLUT_KEY_DOWN:
-      moveDown();
-      break;
-    case GLUT_KEY_LEFT:
-      moveLeft();
-      break;
-    case GLUT_KEY_RIGHT:
-      moveRight();
-      break;
-  }
-
-  if((x != Goku.x) || (y != Goku.y)) {
-    // Moved
-    currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
-    glutPostRedisplay();
-  }
-}
-
-// Read map from file
-void initMap(char *filename)
-{
-  int c;
-  int count_line = MAP_SIZE - 1;
-  int count_col = 0;
-  FILE *file;
-
-  file = fopen(filename, "r");
-  
-  if (file) {
-    while ((c = getc(file)) != EOF) {
-      if (count_col == MAP_SIZE) {
-        count_line--;
-        count_col = 0;
-      } else {
-        MAP[count_col][count_line] = (byte)c;
-        count_col++;
-      }
-    }
-
-    fclose(file);
-  }
-}
-
-// Init agent position
-void initAgent(Position2D *position) {
-  if (position != NULL) {
-    Goku.x = position->x;
-    Goku.y = position->y;
-  } else {
-    Goku.x = 19;
-    Goku.y = 22;
-  }
-}
-
-// Init dragonballs position
-void initDragonballs(Position2D *positions[]) {
-  byte i;
-
-  initRand();
-
-  for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
-    if(positions != NULL && positions[i] != NULL) {
-      Dragonballs[i].x = positions[i]->x;
-      Dragonballs[i].y = positions[i]->y;
-    } else {
-      Dragonballs[i].x = (byte)(rand() % MAP_SIZE);
-      Dragonballs[i].y = (byte)(rand() % MAP_SIZE);
-    }
-  }
-}
-
-// Move agent left one time
-void moveLeft() {
-  if (Goku.x > 0) {
-    Goku.x--;
-  }
-}
-
-// Move agent right one time
-void moveRight() {
-  if (Goku.x < MAP_SIZE - 1) {
-    Goku.x++;
-  }
-}
-
-// Move agent up one time
-void moveUp() {
-  if (Goku.y < MAP_SIZE - 1) {
-    Goku.y++;
-  }
-}
-
-// Move agent down one time
-void moveDown() {
-  if (Goku.y > 0) {
-    Goku.y--;
-  }
 }
 

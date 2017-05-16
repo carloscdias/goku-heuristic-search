@@ -16,12 +16,19 @@ typedef struct {
   byte x, y;
 } Position2D;
 
+typedef struct {
+  byte showGrid, showDragonballs, showInfo;
+  unsigned int currentTotalCost;
+  Position2D lastPosition;
+} BoardSetup;
+
 extern byte MAP[MAP_SIZE][MAP_SIZE];
 extern Position2D Goku;
 extern Position2D Dragonballs[DRAGONBALLS_NUMBER];
 extern char text[TEXT_BUFFER];
-extern unsigned int currentTotalCost;
+extern BoardSetup board;
 
+void initBoard();
 void initMap(char *);
 void initAgent(Position2D *);
 void initDragonballs(Position2D **);
@@ -33,6 +40,7 @@ void moveDown();
 
 void initGL();
 void display();
-void controls(unsigned char, int, int);
+void controls(int, int, int);
+void configs(unsigned char, int, int);
 
 #endif
