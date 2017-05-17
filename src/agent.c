@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-#ifdef __APPLE__ && __MACH__
+#ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
 #endif
@@ -11,6 +11,9 @@
 #include <GL/freeglut.h>
 #endif
 #include <smartgoku.h>
+
+static void update(int);
+static void display();
 
 // Init rand with current time
 static void initRand() {
@@ -46,10 +49,11 @@ void initBoard() {
   board.showGrid = 1;
   board.showDragonRadar = 1;
   board.currentTotalCost = 0;
+  update(0);
 }
 
 // Controls
-void controls(int key, int xScreen, int yScreen) {
+static void controls(int key, int xScreen, int yScreen) {
   byte x, y;
 
   // Old values
@@ -74,12 +78,11 @@ void controls(int key, int xScreen, int yScreen) {
   if((x != Goku.x) || (y != Goku.y)) {
     // Moved
     board.currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
-    glutPostRedisplay();
   }
 }
 
 // Config controls
-void configs(unsigned char key, int x, int y) {
+static void configs(unsigned char key, int x, int y) {
   switch(key) {
     case 'g':
       // Toggle grid display
@@ -104,8 +107,6 @@ void configs(unsigned char key, int x, int y) {
       initAgent(NULL);
       break;
   }
-
-  glutPostRedisplay();
 }
 
 // Read map from file
@@ -200,6 +201,9 @@ void initGL() {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluOrtho2D(0, MAP_SIZE, 0, MAP_SIZE);
+  glutDisplayFunc(display);
+  glutKeyboardFunc(configs);
+  glutSpecialFunc(controls);
 }
 
 // Draw grid
@@ -341,7 +345,7 @@ static void drawText() {
 }
 
 // Draw screen
-void display() {
+static void display() {
   glClear(GL_COLOR_BUFFER_BIT);
 
   // Draw map
@@ -369,5 +373,11 @@ void display() {
   }
 
   glutSwapBuffers();
+}
+
+// Update function
+static void update(int value) {
+  glutPostRedisplay();
+  glutTimerFunc(REFRESH_RATE, update, 0);
 }
 

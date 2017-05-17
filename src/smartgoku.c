@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <smartgoku.h>
-#ifdef __APPLE__ && __MACH__
+#ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
 #endif
@@ -29,9 +29,6 @@ int main(int argc, char *argv[], char *envp[]) {
   glutInitWindowSize(630, 630);
   glutInitWindowPosition(350, 50);
   glutCreateWindow("Smart Goku");
-  glutDisplayFunc(display);
-  glutKeyboardFunc(configs);
-  glutSpecialFunc(controls);
 
   initBoard();
   initMap("Mapa01.txt");

@@ -5,6 +5,7 @@
 #define DRAGONBALLS_NUMBER    7
 #define DRAGON_RADAR_DISTANCE 3
 #define TEXT_BUFFER           50
+#define REFRESH_RATE          30
 
 #define GRASS_COST            1
 #define WATER_COST            10
@@ -28,6 +29,7 @@ extern Position2D Dragonballs[DRAGONBALLS_NUMBER];
 extern char text[TEXT_BUFFER];
 extern BoardSetup board;
 
+void initGL();
 void initBoard();
 void initMap(char *);
 void initAgent(Position2D *);
@@ -37,10 +39,5 @@ void moveLeft();
 void moveRight();
 void moveUp();
 void moveDown();
-
-void initGL();
-void display();
-void controls(int, int, int);
-void configs(unsigned char, int, int);
 
 #endif
