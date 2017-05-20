@@ -3,6 +3,7 @@
 
 #include <types.h>
 #include <search.h>
+#include <stack.h>
 
 #define MAP_SIZE              42
 #define DRAGONBALLS_NUMBER    7
@@ -16,8 +17,8 @@
 // a-star algorithm needs to run properly
 
 extern byte MAP[MAP_SIZE][MAP_SIZE];
-
 extern Problem gokuProblem;
+extern Stack movements;
 
 Action *movements_on_map(State);
 Position2D *create_position(byte, byte);
@@ -30,6 +31,6 @@ int abs(int);
 byte got_the_dragonballs(State);
 double heuristic(State);
 byte compare_positions(void*, void*);
-void *goku_search(byte, byte, byte, byte);
+Stack goku_search(byte, byte, byte, byte);
 
 #endif

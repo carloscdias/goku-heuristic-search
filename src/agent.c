@@ -13,6 +13,7 @@
 #include <smartgoku.h>
 
 static void update(int);
+static void followPath(int);
 static void display();
 
 // Init rand with current time
@@ -49,7 +50,6 @@ void initBoard() {
   board.showGrid = 1;
   board.showDragonRadar = 1;
   board.currentTotalCost = 0;
-  update(0);
 }
 
 // Controls
@@ -102,9 +102,13 @@ static void configs(unsigned char key, int x, int y) {
       break;
     case ' ':
       // Restart
-      initBoard();
+      board.currentTotalCost = 0;
       initDragonballs(NULL);
       initAgent(NULL);
+      break;
+    case 's':
+      // Start/Stop search following the path
+      goku_search(Goku.x, Goku.y, 39, 0);
       break;
   }
 }
@@ -204,6 +208,9 @@ void initGL() {
   glutDisplayFunc(display);
   glutKeyboardFunc(configs);
   glutSpecialFunc(controls);
+  // Timer functions
+  update(0);
+  followPath(0);
 }
 
 // Draw grid
@@ -379,5 +386,25 @@ static void display() {
 static void update(int value) {
   glutPostRedisplay();
   glutTimerFunc(REFRESH_RATE, update, 0);
+}
+
+// follow path function
+static void followPath(int value) {
+  Position2D *new_position;
+
+  if((movements != NULL) && (!ll_is_empty(movements))) {
+    new_position = (Position2D*) st_pop(movements);
+
+    Goku.x = new_position->x;
+    Goku.y = new_position->y;
+
+    board.currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
+
+    free(new_position);
+
+    glutPostRedisplay();
+  }
+
+  glutTimerFunc(GOKU_SEARCH_VELOCITY, followPath, 0);
 }
 

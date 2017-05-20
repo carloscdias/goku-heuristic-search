@@ -6,6 +6,7 @@
 
 #define TEXT_BUFFER           50
 #define REFRESH_RATE          30
+#define GOKU_SEARCH_VELOCITY  300
 
 typedef struct {
   byte showGrid, showDragonballs, showInfo, showDragonRadar;

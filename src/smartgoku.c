@@ -35,8 +35,6 @@ int main(int argc, char *argv[], char *envp[]) {
   initDragonballs(NULL);
   initGL();
 
-  goku_search(26, 15, 30, 15);
-
   glutMainLoop();
 
 	return OK;

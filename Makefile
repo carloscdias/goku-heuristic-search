@@ -7,7 +7,7 @@ LIBS=-lGL -lGLU -lglut
 obj/%.o: src/%.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(INCLUDE)
 
-smartgoku: obj/smartgoku.o obj/agent.o obj/gokusearch.o obj/search.o obj/pqueue.o
+smartgoku: obj/smartgoku.o obj/agent.o obj/gokusearch.o obj/search.o obj/pqueue.o obj/stack.o obj/linkedlist.o
 	$(CC) -o build/$@ $^ $(CFLAGS) $(LIBS)
 
 run:

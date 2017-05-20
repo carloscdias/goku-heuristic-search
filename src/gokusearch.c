@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <types.h>
+#include <stack.h>
 #include <search.h>
 #include <gokusearch.h>
 
-#include <stdio.h>
-
 // Map allocation in memory
 byte MAP[MAP_SIZE][MAP_SIZE];
+
+Stack movements = NULL;
 
 // Problem definition
 Position2D * initial_state;
@@ -24,22 +25,31 @@ Action corner_top_right_node[3] = {moveDown, moveLeft, NULL};
 Action corner_bottom_left_node[3] = {moveUp, moveRight, NULL};
 Action corner_bottom_right_node[3] = {moveUp, moveLeft, NULL};
 
-void *print_path(Node *solution) {
-  if(solution != NULL) {
-    printf("Path: (%d, %d) -> %f\n", ((Position2D*)solution->state)->x, ((Position2D*)solution->state)->y, solution->path_cost );
-    return print_path(solution->parent);
+void *make_path(Node *solution) {
+  Position2D *position;
+
+  if(!ll_is_empty(movements)) {
+    st_destroy_stack(movements);
   }
 
-  return NULL;
+  movements = st_create_stack();
+
+  while(solution != NULL) {
+    position = create_position(((Position2D*)solution->state)->x, ((Position2D*)solution->state)->y);
+    st_push((void*)position, movements);
+    solution = solution->parent;
+  }
+
+  return movements;
 }
 
-void *goku_search(byte x1, byte y1, byte x2, byte y2) {
+Stack goku_search(byte x1, byte y1, byte x2, byte y2) {
   initial_state = create_position(x1, y1);
   goal_state = create_position(x2, y2);
 
   gokuProblem.initial_state = initial_state;
 
-  return A_star_search(&gokuProblem, heuristic, compare_positions, print_path);
+  return (Stack)A_star_search(&gokuProblem, heuristic, compare_positions, make_path);
 }
 
 // Get possible actions
@@ -106,9 +116,8 @@ double cost(Position2D *position) {
     case 'M': return MOUNTAIN_COST;
   }
 
-  // return max value of unsigned
-  printf("Mapa zoado :o\n");
-  return 9999999;
+  // return max value 
+  return MOUNTAIN_COST;
 }
 
 // Actions
