@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <smartgoku.h>
+#include <gokusearch.h>
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
@@ -15,8 +16,6 @@
 // Init global vars
 Position2D Goku;
 Position2D Dragonballs[DRAGONBALLS_NUMBER];
-
-byte MAP[MAP_SIZE][MAP_SIZE];
 
 char text[TEXT_BUFFER];
 
@@ -35,6 +34,8 @@ int main(int argc, char *argv[], char *envp[]) {
   initAgent(NULL);
   initDragonballs(NULL);
   initGL();
+
+  goku_search(26, 15, 30, 15);
 
   glutMainLoop();
 

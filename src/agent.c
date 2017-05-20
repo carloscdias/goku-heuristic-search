@@ -62,16 +62,16 @@ static void controls(int key, int xScreen, int yScreen) {
 
   switch(key) {
     case GLUT_KEY_UP:
-      moveUp();
+      moveGokuUp();
       break;
     case GLUT_KEY_DOWN:
-      moveDown();
+      moveGokuDown();
       break;
     case GLUT_KEY_LEFT:
-      moveLeft();
+      moveGokuLeft();
       break;
     case GLUT_KEY_RIGHT:
-      moveRight();
+      moveGokuRight();
       break;
   }
 
@@ -163,28 +163,28 @@ void initDragonballs(Position2D *positions[]) {
 }
 
 // Move agent left one time
-void moveLeft() {
+void moveGokuLeft() {
   if (Goku.x > 0) {
     Goku.x--;
   }
 }
 
 // Move agent right one time
-void moveRight() {
+void moveGokuRight() {
   if (Goku.x < MAP_SIZE - 1) {
     Goku.x++;
   }
 }
 
 // Move agent up one time
-void moveUp() {
+void moveGokuUp() {
   if (Goku.y < MAP_SIZE - 1) {
     Goku.y++;
   }
 }
 
 // Move agent down one time
-void moveDown() {
+void moveGokuDown() {
   if (Goku.y > 0) {
     Goku.y--;
   }

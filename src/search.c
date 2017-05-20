@@ -2,6 +2,9 @@
 #include <search.h>
 #include <pqueue.h>
 
+// Static function that generates a child node
+static Node *make_child(Problem*, Node*, Action);
+
 // Create node
 Node *create_node(State state, double cost, Node* parent) {
   Node *node;
@@ -25,10 +28,11 @@ byte compare_nodes(void *node1, void *node2) {
 }
 
 // A Star algorithm
-Node *A_star_search(Problem *problem, double (*h)(State), byte (*cmp_state_function)(void*, void*) ){
+void *A_star_search(Problem *problem, double (*h)(State), byte (*cmp_state_function)(void*, void*), void *(*solution)(Node*)){
   Node *node, *child, *in_frontier;
   PQueue *frontier, *explored;
-  ActionsList *actions_list;
+  Action *actions_list;
+  void *memo_solution;
   unsigned int i;
 
   _cmp_function = cmp_state_function;
@@ -51,9 +55,10 @@ Node *A_star_search(Problem *problem, double (*h)(State), byte (*cmp_state_funct
     node = (Node*) pop(frontier);
 
     if(problem->goal_test(node->state)) {
+      memo_solution = solution(node);
       destroy_pqueue(frontier);
       destroy_pqueue(explored);
-      return node;
+      return memo_solution;
     }
 
     // Add node state to explored set
@@ -63,14 +68,14 @@ Node *A_star_search(Problem *problem, double (*h)(State), byte (*cmp_state_funct
     actions_list = problem->actions(node->state);
 
     // Expand node generating a child for each action
-    for(i = 0; i < actions_list->number_of_actions; i++) {
-      child = make_child(problem, node, actions_list->actions[i], h);
+    for(i = 0; actions_list[i] != NULL ; i++) {
+      child = make_child(problem, node, actions_list[i]);
 
-      if(!(is_in_queue(child->state, cmp_state_function, explored) || is_in_queue(child, _cmp_function, frontier))) {
-        insert((void*)child, child->path_cost, frontier);
-      } else if((in_frontier = (Node*) get((void*)child, _cmp_function, frontier)) && (in_frontier->path_cost > child->path_cost)) {
+      if(!(is_in_queue(child->state, cmp_state_function, explored) || is_in_queue(child, compare_nodes, frontier))) {
+        insert((void*)child, child->path_cost + h(child->state), frontier);
+      } else if((in_frontier = (Node*) get((void*)child, compare_nodes, frontier)) && (in_frontier->path_cost > child->path_cost)) {
         // replace node in frontier with child
-        remove_pqueue_node((void*)in_frontier, _cmp_function, frontier);
+        remove_pqueue_node((void*)in_frontier, compare_nodes, frontier);
         insert((void*)child, child->path_cost, frontier);
       }
     }
@@ -83,15 +88,14 @@ Node *A_star_search(Problem *problem, double (*h)(State), byte (*cmp_state_funct
 }
 
 // Make child function
-// g(s) is a function which returns the cost 
-static Node *make_child(Problem *problem, Node *node, Action action, double (*h)(State)) {
+static Node *make_child(Problem *problem, Node *node, Action action) {
   Node *child;
+
 
   child = action(node->state);
 
   child->parent = node;
-
-  child->path_cost += h(child->state);
+  child->path_cost += node->path_cost;
 
   return child;
 }

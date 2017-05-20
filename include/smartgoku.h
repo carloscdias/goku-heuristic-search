@@ -2,16 +2,10 @@
 #define _SMART_GOKU_H_
 
 #include <types.h>
+#include <gokusearch.h>
 
-#define MAP_SIZE              42
-#define DRAGONBALLS_NUMBER    7
-#define DRAGON_RADAR_DISTANCE 3
 #define TEXT_BUFFER           50
 #define REFRESH_RATE          30
-
-#define GRASS_COST            1
-#define WATER_COST            10
-#define MOUNTAIN_COST         60
 
 typedef struct {
   byte showGrid, showDragonballs, showInfo, showDragonRadar;
@@ -19,7 +13,6 @@ typedef struct {
   Position2D lastPosition;
 } BoardSetup;
 
-extern byte MAP[MAP_SIZE][MAP_SIZE];
 extern Position2D Goku;
 extern Position2D Dragonballs[DRAGONBALLS_NUMBER];
 extern char text[TEXT_BUFFER];
@@ -31,9 +24,9 @@ void initMap(char *);
 void initAgent(Position2D *);
 void initDragonballs(Position2D **);
 
-void moveLeft();
-void moveRight();
-void moveUp();
-void moveDown();
+void moveGokuLeft();
+void moveGokuRight();
+void moveGokuUp();
+void moveGokuDown();
 
 #endif

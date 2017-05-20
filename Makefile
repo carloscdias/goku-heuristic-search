@@ -7,8 +7,11 @@ LIBS=-lGL -lGLU -lglut
 obj/%.o: src/%.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(INCLUDE)
 
-smartgoku: obj/smartgoku.o obj/agent.o
+smartgoku: obj/smartgoku.o obj/agent.o obj/gokusearch.o obj/search.o obj/pqueue.o
 	$(CC) -o build/$@ $^ $(CFLAGS) $(LIBS)
+
+run:
+	build/smartgoku
 
 clean:
 	rm obj/*.o

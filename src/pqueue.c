@@ -22,6 +22,7 @@ void destroy_pqueue(PQueue *queue) {
   while(queue->first != NULL) {
     node = queue->first;
     queue->first = queue->first->next;
+    free(node->data);
     free(node);
   }
   

@@ -20,14 +20,6 @@ typedef struct TNode {
 // Action is a function which leads from a state into the next state
 typedef Node *(*Action)(const State);
 
-// List of possible actions from state
-typedef struct {
-  // Number of actions in list
-  unsigned int number_of_actions;
-  // List of actions
-  Action *actions;
-} ActionsList;
-
 // Problem definition
 typedef struct {
   // Initial state of the problem
@@ -40,16 +32,14 @@ typedef struct {
 
   // Function that returns the actions to 
   // perform on the node passed as parameter
-  ActionsList *(*actions)(State); 
+  // It returns a function array NULL terminated
+  Action *(*actions)(State); 
 } Problem;
 
 // Search function
-Node *A_star_search(Problem*, double (*)(State), byte (*)(void*, void*));
+void *A_star_search(Problem*, double (*)(State), byte (*)(void*, void*), void *(*)(Node*));
 
 // Create a single node
 Node *create_node(State, double, Node*);
-
-// Static function that generates a child node
-static Node *make_child(Problem*, Node*, Action, double (*)(State));
 
 #endif
