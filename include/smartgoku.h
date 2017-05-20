@@ -1,5 +1,7 @@
-#ifndef _SMART_GOKU_H
-#define _SMART_GOKU_H
+#ifndef _SMART_GOKU_H_
+#define _SMART_GOKU_H_
+
+#include <types.h>
 
 #define MAP_SIZE              42
 #define DRAGONBALLS_NUMBER    7
@@ -10,12 +12,6 @@
 #define GRASS_COST            1
 #define WATER_COST            10
 #define MOUNTAIN_COST         60
-
-typedef unsigned char byte;
-
-typedef struct {
-  byte x, y;
-} Position2D;
 
 typedef struct {
   byte showGrid, showDragonballs, showInfo, showDragonRadar;
