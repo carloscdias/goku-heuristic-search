@@ -51,6 +51,8 @@ Node *A_star_search(Problem *problem, double (*h)(State), byte (*cmp_state_funct
     node = (Node*) pop(frontier);
 
     if(problem->goal_test(node->state)) {
+      destroy_pqueue(frontier);
+      destroy_pqueue(explored);
       return node;
     }
 
@@ -73,6 +75,9 @@ Node *A_star_search(Problem *problem, double (*h)(State), byte (*cmp_state_funct
       }
     }
   }
+
+  destroy_pqueue(frontier);
+  destroy_pqueue(explored);
 
   return NULL;
 }
