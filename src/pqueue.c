@@ -102,6 +102,8 @@ void remove_pqueue_node(void *data, byte (*cmp_function)(void*, void*), PQueue *
         queue->last = last;
       }
 
+      queue->length--;
+
       free(current);
       return;
     }

@@ -28,7 +28,7 @@ typedef struct {
   // Function to test if a node is a goal,
   // receives the node as parameter and
   // returns 0 if it isn't or 1 if it is a goal
-  byte (*goal_test)(State);
+  byte (*goal_test)(Node*);
 
   // Function that returns the actions to 
   // perform on the node passed as parameter
@@ -37,7 +37,7 @@ typedef struct {
 } Problem;
 
 // Search function
-void *A_star_search(Problem*, double (*)(State), byte (*)(void*, void*), void *(*)(Node*));
+void *A_star_search(Problem*, double (*)(Node*), byte (*)(void*, void*), void *(*)(Node*));
 
 // Create a single node
 Node *create_node(State, double, Node*);

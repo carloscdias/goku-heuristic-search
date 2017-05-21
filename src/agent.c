@@ -108,7 +108,8 @@ static void configs(unsigned char key, int x, int y) {
       break;
     case 's':
       // Start/Stop search following the path
-      goku_search(Goku.x, Goku.y, 39, 0);
+      explore_map_search();
+      //goku_search(Goku.x, Goku.y, 40, 7);
       break;
   }
 }

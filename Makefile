@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-g -Wall
 INCLUDE=-I./include/
 LIBS=-lGL -lGLU -lglut
 #LIBS=-framework OpenGL -framework GLUT

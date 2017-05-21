@@ -18,6 +18,7 @@
 
 extern byte MAP[MAP_SIZE][MAP_SIZE];
 extern Problem gokuProblem;
+//extern Problem mapExploreProblem;
 extern Stack movements;
 
 Action *movements_on_map(State);
@@ -28,8 +29,8 @@ Node * moveDown(const State);
 Node * moveLeft(const State);
 Node * moveRight(const State);
 int abs(int);
-byte got_the_dragonballs(State);
-double heuristic(State);
+byte got_the_dragonballs(Node*);
+double heuristic(Node*);
 byte compare_positions(void*, void*);
 Stack goku_search(byte, byte, byte, byte);
 
