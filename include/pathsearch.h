@@ -19,7 +19,7 @@ byte reached_destination(State);
 double manhatan_distance_to_destination(State);
 
 // Main search for this module
-Stack path_search(byte, byte, byte, byte);
+void path_search(byte, byte, byte, byte);
 
 // Create solution as stack and put it on movements
 void *make_path(Node*);

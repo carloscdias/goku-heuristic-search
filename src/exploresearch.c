@@ -1,92 +1,224 @@
 #include <stdlib.h>
 #include <utils.h>
 #include <exploresearch.h>
+#include <pathsearch.h>
 
 // TEMPORARIO
-#include <pathsearch.h>
 #include <stdio.h>
 
 // Explore the map problem
-Position2D *initial_state;
+ExploreState *initial_state;
 
-Problem exploreMapProblem = {&initial_state, explored_the_map, movements_on_map};
+Problem explore_problem = {&initial_state, explored_the_map, movements_on_explore_map};
 
-// Possível heurística para exploração do mapa: número de "pixels" não explorados
-// armazenar no estado a posição e mapa explorado até o momento.
-// Talvez compense modificar o formato da função de cálculo de heurística para permitir
-// a passagem do nó como parâmetro para cálculo do mapa visível em tempo de execução para
-// um dado nó.
+// Actions
+Action explore_general_node[5] = {exploreUp, exploreDown, exploreLeft, exploreRight, NULL};
+Action explore_low_x_node[4] = {exploreUp, exploreDown, exploreRight, NULL};
+Action explore_low_y_node[4] = {exploreUp, exploreLeft, exploreRight, NULL};
+Action explore_high_x_node[4] = {exploreUp, exploreDown, exploreLeft, NULL};
+Action explore_high_y_node[4] = {exploreDown, exploreLeft, exploreRight, NULL};
+Action explore_corner_top_left_node[3] = {exploreDown, exploreRight, NULL};
+Action explore_corner_top_right_node[3] = {exploreDown, exploreLeft, NULL};
+Action explore_corner_bottom_left_node[3] = {moveUp, exploreRight, NULL};
+Action explore_corner_bottom_right_node[3] = {exploreUp, exploreLeft, NULL};
 
+
+// Print position funtion for debug purposes
 void print_position(Position2D *position) {
   printf("Position: (%d, %d)\n", position->x, position->y);
 }
 
-// Explore map search
-Stack explore_map_search() {
-  initial_state = create_position(19, 22);
+void print_map(ExploreState *state) {
+  byte x, y;
 
-  exploreMapProblem.initial_state = initial_state;
-
-  return (Stack)A_star_search(&exploreMapProblem, explore_map_heuristic, compare_positions, make_path);
-}
-
-// Goal for the explore the map
-byte explored_the_map(State state) {
-  return 1;
-}
-
-// Number of unexplored regions
-int get_number_unexplored_regions(byte currentMap[MAP_SIZE][MAP_SIZE]) {
-  int x, y;
-  int sum;
-
-  sum = 0;
+  printf("Printing map...\n");
 
   for(x = 0; x < MAP_SIZE; x++) {
     for(y = 0; y < MAP_SIZE; y++) {
-      if(currentMap[x][y] == 0) {
-        sum += 1;
-      }
+      printf("%d", state->explored_map[x][y]);
     }
+    printf("\n");
   }
-
-  return sum;
 }
 
-// Init unexplored map
-void init_explored_map(byte currentMap[MAP_SIZE][MAP_SIZE]) {
+// Push path to the stack of movements
+void *make_explore_path(Node *solution) {
+  Position2D *position;
+
+  if(!ll_is_empty(movements)) {
+    st_destroy_stack(movements);
+  }
+
+  movements = st_create_stack();
+
+  while(solution != NULL) {
+    position = create_position(((ExploreState*)solution->state)->current_position.x, ((ExploreState*)solution->state)->current_position.y);
+    st_push((void*)position, movements);
+    solution = solution->parent;
+  }
+
+  return movements;
+}
+
+// Explore map search
+void explore_search() {
+
+  initial_state = (ExploreState*) malloc(sizeof(ExploreState));
+
+  // Copy current explored map to initial problem state
+  copy_explored_map(initial_state->explored_map, EXPLORED_MAP);
+
+  // Copy current Goku position
+  initial_state->current_position.x = Goku.x;
+  initial_state->current_position.y = Goku.y;
+
+  explore_problem.initial_state = initial_state;
+
+  A_star_search(&explore_problem, number_of_unexplored_regions, compare_maps, make_explore_path);
+}
+
+// Count the number of unexplored regions
+double number_of_unexplored_regions(State state) {
+  double unexplored_regions = 0.0;
   byte x, y;
 
   for(x = 0; x < MAP_SIZE; x++) {
     for(y = 0; y < MAP_SIZE; y++) {
-      currentMap[x][y] = 0;
+      if(((ExploreState*)state)->explored_map[x][y] == 0) {
+        unexplored_regions += 1.0;
+      }
     }
   }
+
+  return unexplored_regions;
 }
 
-// Fill explored map based on position
-void fill_explored_map(byte currentMap[MAP_SIZE][MAP_SIZE], Position2D *position) {
-  int x, y, startX, startY, endX, endY;
+// Goal for the explore the map
+byte explored_the_map(State state) {
+  print_map((ExploreState*)state);
+  return (number_of_unexplored_regions(state) <= EXPLORE_ERROR);
+}
 
-  startX = position->x - DRAGON_RADAR_DISTANCE;
-  startX = (startX < 0)?0:startX;
-  endX = position->x + DRAGON_RADAR_DISTANCE + 1;
-  endX = (endX < MAP_SIZE)?endX:(MAP_SIZE - 1);
+// Compare maps
+byte compare_maps(State state1, State state2) {
+  byte x, y;
+  /*
+  unsigned int errors = 0;
 
-  startY = position->y - DRAGON_RADAR_DISTANCE;
-  startY = (startY < 0)?0:startY;
-  endY = position->y + DRAGON_RADAR_DISTANCE + 1;
-  endY = (endY < MAP_SIZE)?endY:(MAP_SIZE - 1);
-
-  for(x = startX; x <= endX; x++) {
-    for(y = startY; y <= endY; y++) {
-      currentMap[x][y] = 1;
+  for(x = 0; x < MAP_SIZE; x++) {
+    for(y = 0; y < MAP_SIZE; y++) {
+      if(((ExploreState*)state1)->explored_map[x][y] != ((ExploreState*)state2)->explored_map[x][y]) {
+        errors++;
+      }
     }
-  }
+  }*/
+  return (number_of_unexplored_regions(state1) == number_of_unexplored_regions(state2));
+
+  //return (errors == 0);
 }
 
-// Explore map heuristic
-double explore_map_heuristic(State state) {
-  return (double)0.0;
+// Actions
+Node * exploreUp(const State state) {
+  ExploreState *es, *new_es;
+
+  es = (ExploreState*) state;
+  new_es = (ExploreState*) malloc(sizeof(ExploreState));
+
+  new_es->current_position.x = es->current_position.x;
+  new_es->current_position.y = es->current_position.y + 1;
+
+  copy_explored_map(new_es->explored_map, es->explored_map);
+  fill_explored_map(new_es->explored_map, &new_es->current_position);
+
+  return create_node((State)new_es, movement_cost(&new_es->current_position), NULL);
+}
+
+Node * exploreDown(const State state) {
+  ExploreState *es, *new_es;
+
+  es = (ExploreState*) state;
+  new_es = (ExploreState*) malloc(sizeof(ExploreState));
+
+  new_es->current_position.x = es->current_position.x;
+  new_es->current_position.y = es->current_position.y - 1;
+
+  copy_explored_map(new_es->explored_map, es->explored_map);
+  fill_explored_map(new_es->explored_map, &new_es->current_position);
+
+  return create_node((State)new_es, movement_cost(&new_es->current_position), NULL);
+}
+
+Node * exploreLeft(const State state) {
+  ExploreState *es, *new_es;
+
+  es = (ExploreState*) state;
+  new_es = (ExploreState*) malloc(sizeof(ExploreState));
+
+  new_es->current_position.x = es->current_position.x - 1;
+  new_es->current_position.y = es->current_position.y;
+
+  copy_explored_map(new_es->explored_map, es->explored_map);
+  fill_explored_map(new_es->explored_map, &new_es->current_position);
+
+  return create_node((State)new_es, movement_cost(&new_es->current_position), NULL);
+}
+
+Node * exploreRight(const State state) {
+  ExploreState *es, *new_es;
+
+  es = (ExploreState*) state;
+  new_es = (ExploreState*) malloc(sizeof(ExploreState));
+
+  new_es->current_position.x = es->current_position.x + 1;
+  new_es->current_position.y = es->current_position.y;
+
+  copy_explored_map(new_es->explored_map, es->explored_map);
+  fill_explored_map(new_es->explored_map, &new_es->current_position);
+
+  return create_node((State)new_es, movement_cost(&new_es->current_position), NULL);
+}
+
+// Get possible actions
+Action *movements_on_explore_map(State state) {
+  Position2D position;
+
+  position.x = ((ExploreState*) state)->current_position.x;
+  position.y = ((ExploreState*) state)->current_position.y;
+
+  if(position.x == 0) {
+
+    if(position.y == 0) {
+      return explore_corner_bottom_left_node;
+    }
+
+    if(position.y == (MAP_SIZE - 1)) {
+      return explore_corner_top_left_node;
+    }
+
+    return explore_low_x_node;
+  }
+
+  if (position.x == (MAP_SIZE - 1)) {
+
+    if(position.y == 0) {
+      return explore_corner_bottom_right_node;
+    }
+
+    if(position.y == (MAP_SIZE - 1)) {
+      return explore_corner_top_right_node;
+    }
+
+    return explore_high_x_node;
+  }
+
+  if(position.y == (MAP_SIZE - 1)) {
+    return explore_high_y_node;
+  }
+
+  if(position.y == 0) {
+    return explore_low_y_node;
+  }
+
+  return explore_general_node;
 }
 
