@@ -7,7 +7,7 @@ LIBS=-framework OpenGL -framework GLUT
 obj/%.o: src/%.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(INCLUDE)
 
-smartgoku: obj/smartgoku.o obj/agent.o obj/pathsearch.o obj/utils.o obj/search.o obj/pqueue.o obj/stack.o obj/linkedlist.o
+smartgoku: obj/smartgoku.o obj/agent.o obj/exploresearch.o obj/pathsearch.o obj/search.o obj/utils.o obj/pqueue.o obj/stack.o obj/linkedlist.o
 	$(CC) -o build/$@ $^ $(CFLAGS) $(LIBS)
 
 run:

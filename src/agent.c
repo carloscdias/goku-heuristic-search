@@ -10,6 +10,9 @@
 #include <GL/gl.h>
 #include <GL/freeglut.h>
 #endif
+#include <utils.h>
+#include <pathsearch.h>
+#include <exploresearch.h>
 #include <smartgoku.h>
 
 static void update(int);
@@ -42,6 +45,7 @@ void initBoard() {
 
 // Controls
 static void controls(int key, int xScreen, int yScreen) {
+  Position2D *position;
   byte x, y;
 
   // Old values
@@ -65,7 +69,9 @@ static void controls(int key, int xScreen, int yScreen) {
 
   if((x != Goku.x) || (y != Goku.y)) {
     // Moved
-    board.currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
+    position = create_position(Goku.x, Goku.y);
+    board.currentTotalCost += movement_cost(position);
+    free(position);
   }
 }
 
@@ -96,8 +102,8 @@ static void configs(unsigned char key, int x, int y) {
       break;
     case 's':
       // Start/Stop search following the path
-      explore_map_search();
-      //goku_search(Goku.x, Goku.y, 40, 7);
+      //explore_map_search();
+      path_search(Goku.x, Goku.y, 40, 7);
       break;
   }
 }

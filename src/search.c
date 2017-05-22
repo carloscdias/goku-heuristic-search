@@ -57,7 +57,7 @@ void *A_star_search(Problem *problem, double (*h)(State), unsigned char (*cmp_st
   while(!is_empty(frontier)) {
     node = (Node*) pop(frontier);
 
-    if(problem->goal_test(node)) {
+    if(problem->goal_test(node->state)) {
       memo_solution = solution(node);
       destroy_pqueue(frontier);
       destroy_pqueue(explored);

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <utils.h>
 
 // Cost of the movement on the map

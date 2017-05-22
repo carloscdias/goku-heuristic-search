@@ -23,9 +23,9 @@ typedef struct {
   State initial_state;
   
   // Function to test if a node is a goal,
-  // receives the node as parameter and
+  // receives the node state as parameter and
   // returns 0 if it isn't or 1 if it is a goal
-  unsigned char (*goal_test)(Node*);
+  unsigned char (*goal_test)(State);
 
   // Function that returns the actions to 
   // perform on the node passed as parameter
@@ -34,7 +34,7 @@ typedef struct {
 } Problem;
 
 // Search function
-void *A_star_search(Problem*, double (*)(Node*), unsigned char (*)(void*, void*), void *(*)(Node*));
+void *A_star_search(Problem*, double (*)(State), unsigned char (*)(void*, void*), void *(*)(Node*));
 
 // Create a single node
 Node *create_node(State, double, Node*);
