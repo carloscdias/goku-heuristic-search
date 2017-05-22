@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <smartgoku.h>
-#include <gokusearch.h>
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>

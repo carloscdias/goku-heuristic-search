@@ -1,7 +1,7 @@
 #ifndef _SMART_GOKU_H_
 #define _SMART_GOKU_H_
 
-#include <types.h>
+#include <utils.h>
 
 #define TEXT_BUFFER           50
 #define REFRESH_RATE          30
