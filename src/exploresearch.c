@@ -1,8 +1,14 @@
 #include <stdlib.h>
 #include <utils.h>
+#include <exploresearch.h>
+
+// TEMPORARIO
 #include <pathsearch.h>
+#include <stdio.h>
 
 // Explore the map problem
+Position2D *initial_state;
+
 Problem exploreMapProblem = {&initial_state, explored_the_map, movements_on_map};
 
 // Possível heurística para exploração do mapa: número de "pixels" não explorados
@@ -25,22 +31,8 @@ Stack explore_map_search() {
 }
 
 // Goal for the explore the map
-byte explored_the_map(Node *node) {
-  Node *tmp;
-  byte currentExploredMap[MAP_SIZE][MAP_SIZE];
-
-  init_explored_map(currentExploredMap);
-
-  tmp = node;
-
-  while(tmp != NULL) {
-    fill_explored_map(currentExploredMap, (Position2D*)tmp->state);
-    tmp = tmp->parent;
-  }
-
-  printf("RESTANTE: %d\n",get_number_unexplored_regions(currentExploredMap));
-
-  return (get_number_unexplored_regions(currentExploredMap) < 200);
+byte explored_the_map(State state) {
+  return 1;
 }
 
 // Number of unexplored regions
@@ -94,24 +86,7 @@ void fill_explored_map(byte currentMap[MAP_SIZE][MAP_SIZE], Position2D *position
 }
 
 // Explore map heuristic
-double explore_map_heuristic(Node *node) {
-  Node *tmp;
-  byte currentExploredMap[MAP_SIZE][MAP_SIZE];
-  double i;
-
-  init_explored_map(currentExploredMap);
-
-  tmp = node;
-  print_position((Position2D*)node->state);
-
-  while(tmp != NULL) {
-    fill_explored_map(currentExploredMap, (Position2D*)tmp->state);
-    tmp = tmp->parent;
-  }
-  
-  i = get_number_unexplored_regions(currentExploredMap);
-  printf("current number of unexplored regions: %f\n", i);
-
-  return i;
+double explore_map_heuristic(State state) {
+  return (double)0.0;
 }
 

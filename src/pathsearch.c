@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <utils.h>
+#include <pathsearch.h>
 
 // Path finding problem
-Position2D * initial_state;
-Position2D * goal_state;
+Position2D *initial_state;
+Position2D *goal_state;
 
 Problem gokuProblem = {&initial_state, reached_destination, movements_on_map};
 
@@ -36,13 +37,13 @@ void *make_path(Node *solution) {
   return movements;
 }
 
-Stack goku_search(byte x1, byte y1, byte x2, byte y2) {
+Stack path_search(byte x1, byte y1, byte x2, byte y2) {
   initial_state = create_position(x1, y1);
   goal_state = create_position(x2, y2);
 
   gokuProblem.initial_state = initial_state;
 
-  return (Stack)A_star_search(&gokuProblem, heuristic, compare_positions, make_path);
+  return (Stack)A_star_search(&gokuProblem, manhatan_distance_to_destination, compare_positions, make_path);
 }
 
 // Get possible actions
@@ -94,7 +95,7 @@ Node * moveUp(const State state) {
 
   new_position = create_position(position->x, position->y + 1);
 
-  return create_node((State)new_position, cost(new_position), NULL);
+  return create_node((State)new_position, movement_cost(new_position), NULL);
 }
 
 Node * moveDown(const State state) {
@@ -103,7 +104,7 @@ Node * moveDown(const State state) {
 
   new_position = create_position(position->x, position->y - 1);
 
-  return create_node((State)new_position, cost(new_position), NULL);
+  return create_node((State)new_position, movement_cost(new_position), NULL);
 }
 
 Node * moveLeft(const State state) {
@@ -112,7 +113,7 @@ Node * moveLeft(const State state) {
 
   new_position = create_position(position->x - 1, position->y);
 
-  return create_node((State)new_position, cost(new_position), NULL);
+  return create_node((State)new_position, movement_cost(new_position), NULL);
 }
 
 Node * moveRight(const State state) {
@@ -121,18 +122,18 @@ Node * moveRight(const State state) {
 
   new_position = create_position(position->x + 1, position->y);
 
-  return create_node((State)new_position, cost(new_position), NULL);
+  return create_node((State)new_position, movement_cost(new_position), NULL);
 }
 
 // Goal test function
-byte reached_destination(Node *node) {
-  return compare_positions((Position2D*) node->state, goal_state);
+byte reached_destination(State state) {
+  return compare_positions((Position2D*) state, goal_state);
 }
 
 // Heuristic function for this problem
-double manhatan_distance_to_destination(Node *node) {
+double manhatan_distance_to_destination(State state) {
   Position2D *position;
-  position = (Position2D*) node->state;
-  return (abs(position->x - goal_state->x) + abs(position->y - goal_state->y));
+  position = (Position2D*) state;
+  return (double)(abs(position->x - goal_state->x) + abs(position->y - goal_state->y));
 }
 
