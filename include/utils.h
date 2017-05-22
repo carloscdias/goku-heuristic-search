@@ -12,6 +12,13 @@
 #define WATER_COST            10
 #define MOUNTAIN_COST         60
 
+// Simple data structures used accross the program
+typedef unsigned char byte;
+
+typedef struct {
+  byte x, y;
+} Position2D;
+
 // Map
 extern byte MAP[MAP_SIZE][MAP_SIZE];
 
@@ -25,13 +32,6 @@ extern Stack movements;
 // Entity variables
 extern Position2D Goku;
 extern Position2D Dragonballs[DRAGONBALLS_NUMBER];
-
-// Simple data structures used accross the program
-typedef unsigned char byte;
-
-typedef struct {
-  byte x, y;
-} Position2D;
 
 // Util functions for the problems
 byte movement_cost(Position2D*);
