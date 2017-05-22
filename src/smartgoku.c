@@ -16,6 +16,8 @@
 // Init global vars
 Position2D Goku;
 Position2D Dragonballs[DRAGONBALLS_NUMBER];
+byte MAP[MAP_SIZE][MAP_SIZE];
+Stack movements = NULL;
 
 char text[TEXT_BUFFER];
 

@@ -36,3 +36,4 @@ void *st_pop(Stack stack) {
 
   return data;
 }
+

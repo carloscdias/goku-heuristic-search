@@ -1,8 +1,6 @@
 #ifndef _PQUEUE_H_
 #define _PQUEUE_H_
 
-#include <types.h>
-
 typedef struct TPQueueNode {
   double priority;
   void *data;
@@ -21,16 +19,16 @@ PQueue *create_pqueue();
 void destroy_pqueue(PQueue*);
 
 // Returns true if queue is empty
-byte is_empty(PQueue*);
+unsigned char is_empty(PQueue*);
 
 // Returns true if element is in queue
-byte is_in_queue(void*, byte (*)(void*, void*), PQueue*); 
+unsigned char is_in_queue(void*, unsigned char (*)(void*, void*), PQueue*); 
 
 // Insert node in queue
 void insert(void*, double, PQueue*);
 
 // Remove node from queue
-void remove_pqueue_node(void*, byte (*)(void*, void*), PQueue*);
+void remove_pqueue_node(void*, unsigned char (*)(void*, void*), PQueue*);
 
 // Create pqueue node
 PQueueNode *create_pqueue_node(void*, double);
@@ -39,6 +37,6 @@ PQueueNode *create_pqueue_node(void*, double);
 void *pop(PQueue*);
 
 // Retrieve element in queue based in a compare function
-void *get(void*, byte (*)(void*, void*), PQueue*);
+void *get(void*, unsigned char (*)(void*, void*), PQueue*);
 
 #endif
