@@ -16,6 +16,7 @@
 Position2D Goku;
 Position2D Dragonballs[DRAGONBALLS_NUMBER];
 byte MAP[MAP_SIZE][MAP_SIZE];
+byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
 Stack movements = NULL;
 
 char text[TEXT_BUFFER];
@@ -33,6 +34,8 @@ int main(int argc, char *argv[], char *envp[]) {
   initBoard();
   initMap("Mapa01.txt");
   initAgent(NULL);
+  init_explored_map(EXPLORED_MAP);
+  fill_explored_map(EXPLORED_MAP, &Goku);
   initDragonballs(NULL);
   initGL();
 

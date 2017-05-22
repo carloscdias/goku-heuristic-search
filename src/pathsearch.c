@@ -19,6 +19,7 @@ Action corner_top_right_node[3] = {moveDown, moveLeft, NULL};
 Action corner_bottom_left_node[3] = {moveUp, moveRight, NULL};
 Action corner_bottom_right_node[3] = {moveUp, moveLeft, NULL};
 
+// Push solution to the movements stack
 void *make_path(Node *solution) {
   Position2D *position;
 
@@ -37,13 +38,15 @@ void *make_path(Node *solution) {
   return movements;
 }
 
-Stack path_search(byte x1, byte y1, byte x2, byte y2) {
+// Main search function for this module
+void path_search(byte x1, byte y1, byte x2, byte y2) {
   initial_state = create_position(x1, y1);
   goal_state = create_position(x2, y2);
-
   gokuProblem.initial_state = initial_state;
 
-  return (Stack)A_star_search(&gokuProblem, manhatan_distance_to_destination, compare_positions, make_path);
+  A_star_search(&gokuProblem, manhatan_distance_to_destination, compare_positions, make_path);
+
+  free(goal_state);
 }
 
 // Get possible actions
