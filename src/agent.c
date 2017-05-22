@@ -31,18 +31,6 @@ static void toggle(byte *value) {
   }
 }
 
-// Path cost
-static byte getPathCost(char currentState) {
-  switch(currentState) {
-    case 'G': return GRASS_COST;
-    case 'A': return WATER_COST;
-    case 'M': return MOUNTAIN_COST;
-  }
-
-  // return max value of unsigned
-  return -1;
-}
-
 // Init board
 void initBoard() {
   board.showInfo = 1;
@@ -399,7 +387,7 @@ static void followPath(int value) {
     Goku.x = new_position->x;
     Goku.y = new_position->y;
 
-    board.currentTotalCost += getPathCost(MAP[Goku.x][Goku.y]);
+    board.currentTotalCost += movement_cost(new_position);
 
     free(new_position);
 

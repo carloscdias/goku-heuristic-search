@@ -30,12 +30,12 @@ void destroy_pqueue(PQueue *queue) {
 }
 
 // Returns true if queue is empty
-byte is_empty(PQueue* queue) {
+unsigned char is_empty(PQueue* queue) {
   return (queue->length == 0);
 }
 
 // Returns true if element is in queue
-byte is_in_queue(void *element, byte (*cmp_function)(void*, void*), PQueue *queue) {
+unsigned char is_in_queue(void *element, unsigned char (*cmp_function)(void*, void*), PQueue *queue) {
   return (get(element, cmp_function, queue) != NULL);
 } 
 
@@ -79,7 +79,7 @@ void insert(void *data, double priority, PQueue *queue) {
 }
 
 // Remove node from queue
-void remove_pqueue_node(void *data, byte (*cmp_function)(void*, void*), PQueue *queue) {
+void remove_pqueue_node(void *data, unsigned char (*cmp_function)(void*, void*), PQueue *queue) {
   PQueueNode *current, *last;
 
   if(is_empty(queue)) {
@@ -143,7 +143,7 @@ void *pop(PQueue *queue) {
 }
 
 // Retrieve element in queue based in a compare function
-void *get(void *element, byte (*cmp_function)(void*, void*), PQueue *queue) {
+void *get(void *element, unsigned char (*cmp_function)(void*, void*), PQueue *queue) {
   PQueueNode *node;
 
   if (is_empty(queue)) {

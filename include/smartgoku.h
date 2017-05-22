@@ -2,7 +2,6 @@
 #define _SMART_GOKU_H_
 
 #include <types.h>
-#include <gokusearch.h>
 
 #define TEXT_BUFFER           50
 #define REFRESH_RATE          30
@@ -14,8 +13,6 @@ typedef struct {
   Position2D lastPosition;
 } BoardSetup;
 
-extern Position2D Goku;
-extern Position2D Dragonballs[DRAGONBALLS_NUMBER];
 extern char text[TEXT_BUFFER];
 extern BoardSetup board;
 
