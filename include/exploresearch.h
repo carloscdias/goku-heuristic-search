@@ -11,6 +11,9 @@ typedef struct {
   Position2D current_position;
 } ExploreState;
 
+// Main function for this module
+void explore_search();
+
 // Goal test function
 byte explored_the_map(State);
 

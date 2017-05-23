@@ -102,7 +102,6 @@ byte explored_the_map(State state) {
 // Compare maps
 byte compare_maps(State state1, State state2) {
   byte x, y;
-  /*
   unsigned int errors = 0;
 
   for(x = 0; x < MAP_SIZE; x++) {
@@ -111,10 +110,9 @@ byte compare_maps(State state1, State state2) {
         errors++;
       }
     }
-  }*/
-  return (number_of_unexplored_regions(state1) == number_of_unexplored_regions(state2));
+  }
 
-  //return (errors == 0);
+  return (errors == 0);
 }
 
 // Actions
