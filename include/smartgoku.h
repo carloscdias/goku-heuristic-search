@@ -10,7 +10,6 @@
 typedef struct {
   byte showGrid, showDragonballs, showInfo, showDragonRadar, caughtDragonballs;
   unsigned int currentTotalCost;
-  Position2D lastPosition;
 } BoardSetup;
 
 extern char text[TEXT_BUFFER];
