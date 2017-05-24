@@ -37,7 +37,7 @@ int main(int argc, char *argv[], char *envp[]) {
   initMap("Mapa01.txt");
   initAgent(NULL);
   init_explored_map(EXPLORED_MAP);
-  fill_explored_map(EXPLORED_MAP, &goku);
+  fill_explored_map(EXPLORED_MAP, &goku.current_position);
   initDragonballs(NULL);
   initGL();
 
