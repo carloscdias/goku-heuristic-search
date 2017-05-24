@@ -21,6 +21,9 @@ double manhatan_distance_to_destination(State);
 // Main search for this module
 void path_search(byte, byte, byte, byte);
 
+// Search to get the best path cost only
+unsigned int path_cost(byte, byte, byte, byte);
+
 // Create solution as stack and put it on movements
 void *make_path(Node*);
 

@@ -102,8 +102,10 @@ static void configs(unsigned char key, int x, int y) {
       break;
     case 's':
       // Start/Stop search following the path
-      explore_search();
-      //path_search(Goku.x, Goku.y, 40, 7);
+      // explore_search();
+      printf("Cost: %d\n", path_cost(Goku.x, Goku.y, 40, 7));
+      printf("Cost: %d\n", path_cost(19, 25, 19, 26));
+      path_search(Goku.x, Goku.y, 40, 7);
       break;
   }
 }
