@@ -21,6 +21,11 @@ typedef struct {
   byte x, y;
 } Position2D;
 
+typedef struct {
+  Position2D dragonball[DRAGONBALLS_NUMBER];
+  byte caught, seen;
+} Dragonballs;
+
 // Map
 extern byte MAP[MAP_SIZE][MAP_SIZE];
 extern byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
@@ -33,8 +38,8 @@ extern Problem mapExploreProblem;
 extern Stack movements;
 
 // Entity variables
-extern Position2D Goku;
-extern Position2D Dragonballs[DRAGONBALLS_NUMBER];
+extern Position2D goku;
+extern Dragonballs world_objectives;
 
 // Util functions for the problems
 byte movement_cost(Position2D*);
