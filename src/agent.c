@@ -49,8 +49,8 @@ static void controls(int key, int xScreen, int yScreen) {
   byte x, y;
 
   // Old values
-  x = Goku.x;
-  y = Goku.y;
+  x = goku.x;
+  y = goku.y;
 
   switch(key) {
     case GLUT_KEY_UP:
@@ -67,9 +67,9 @@ static void controls(int key, int xScreen, int yScreen) {
       break;
   }
 
-  if((x != Goku.x) || (y != Goku.y)) {
+  if((x != goku.x) || (y != goku.y)) {
     // Moved
-    position = create_position(Goku.x, Goku.y);
+    position = create_position(goku.x, goku.y);
     board.currentTotalCost += movement_cost(position);
     free(position);
   }
@@ -103,9 +103,8 @@ static void configs(unsigned char key, int x, int y) {
     case 's':
       // Start/Stop search following the path
       // explore_search();
-      printf("Cost: %d\n", path_cost(Goku.x, Goku.y, 40, 7));
-      printf("Cost: %d\n", path_cost(19, 25, 19, 26));
-      path_search(Goku.x, Goku.y, 40, 7);
+      printf("Cost: %d\n", path_cost(goku.x, goku.y, 40, 7));
+      path_search(goku.x, goku.y, 40, 7);
       break;
   }
 }
@@ -138,11 +137,11 @@ void initMap(char *filename)
 // Init agent position
 void initAgent(Position2D *position) {
   if (position != NULL) {
-    Goku.x = position->x;
-    Goku.y = position->y;
+    goku.x = position->x;
+    goku.y = position->y;
   } else {
-    Goku.x = 19;
-    Goku.y = 22;
+    goku.x = 19;
+    goku.y = 22;
   }
 }
 
@@ -165,29 +164,29 @@ void initDragonballs(Position2D *positions[]) {
 
 // Move agent left one time
 void moveGokuLeft() {
-  if (Goku.x > 0) {
-    Goku.x--;
+  if (goku.x > 0) {
+    goku.x--;
   }
 }
 
 // Move agent right one time
 void moveGokuRight() {
-  if (Goku.x < MAP_SIZE - 1) {
-    Goku.x++;
+  if (goku.x < MAP_SIZE - 1) {
+    goku.x++;
   }
 }
 
 // Move agent up one time
 void moveGokuUp() {
-  if (Goku.y < MAP_SIZE - 1) {
-    Goku.y++;
+  if (goku.y < MAP_SIZE - 1) {
+    goku.y++;
   }
 }
 
 // Move agent down one time
 void moveGokuDown() {
-  if (Goku.y > 0) {
-    Goku.y--;
+  if (goku.y > 0) {
+    goku.y--;
   }
 }
 
@@ -276,7 +275,7 @@ static void drawMap() {
 // Draw agent goku
 static void drawGoku() {
   glBegin(GL_QUADS);
-  drawUnitSquare(Goku.x, Goku.y, 0.75f, 0.3125f, 0.30078125f, 1.0f);
+  drawUnitSquare(goku.x, goku.y, 0.75f, 0.3125f, 0.30078125f, 1.0f);
   glEnd();
 }
 
@@ -300,10 +299,10 @@ static void drawDragonRadar() {
 
   glBegin(GL_QUADS);
 
-  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y + DRAGON_RADAR_DISTANCE + 1);
-  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y + DRAGON_RADAR_DISTANCE + 1);
-  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y - DRAGON_RADAR_DISTANCE);
-  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y - DRAGON_RADAR_DISTANCE);
 
   glEnd();
 
@@ -315,20 +314,20 @@ static void drawDragonRadar() {
   glBegin(GL_LINES);
 
   // Up
-  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y + DRAGON_RADAR_DISTANCE + 1);
-  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y + DRAGON_RADAR_DISTANCE + 1);
 
   // Down
-  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y - DRAGON_RADAR_DISTANCE);
-  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y - DRAGON_RADAR_DISTANCE);
 
   // Left
-  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y - DRAGON_RADAR_DISTANCE);
-  glVertex2f(Goku.x - DRAGON_RADAR_DISTANCE, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y + DRAGON_RADAR_DISTANCE + 1);
 
   // Right
-  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y - DRAGON_RADAR_DISTANCE);
-  glVertex2f(Goku.x + DRAGON_RADAR_DISTANCE + 1, Goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y + DRAGON_RADAR_DISTANCE + 1);
 
   glEnd();
 }
@@ -337,7 +336,7 @@ static void drawDragonRadar() {
 static void drawText() {
   byte i, length;
 
-  sprintf(text, "Custo: %d - Posicao: (%d, %d)", board.currentTotalCost, Goku.x, Goku.y);
+  sprintf(text, "Custo: %d - Posicao: (%d, %d)", board.currentTotalCost, goku.x, goku.y);
   length = strlen(text);
 
   //glColor3f(0.0f, 0.0f, 0.0f);
@@ -392,10 +391,12 @@ static void followPath(int value) {
   if((movements != NULL) && (!ll_is_empty(movements))) {
     new_position = (Position2D*) st_pop(movements);
 
-    Goku.x = new_position->x;
-    Goku.y = new_position->y;
+    if((goku.x != new_position->x) || (goku.y != new_position->y)) {
+      goku.x = new_position->x;
+      goku.y = new_position->y;
 
-    board.currentTotalCost += movement_cost(new_position);
+      board.currentTotalCost += movement_cost(new_position);
+    }
 
     free(new_position);
 
