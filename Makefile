@@ -1,8 +1,12 @@
 CC=gcc
 CFLAGS=-g -Wall
 INCLUDE=-I./include/
-LIBS=-lGL -lGLU -lglut
-#LIBS=-framework OpenGL -framework GLUT
+
+ifeq ($(shell uname), Linux)
+	LIBS=-lGL -lGLU -lglut
+else
+	LIBS=-framework OpenGL -framework GLUT
+endif
 
 obj/%.o: src/%.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(INCLUDE)
