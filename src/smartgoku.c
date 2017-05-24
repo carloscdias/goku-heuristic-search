@@ -13,10 +13,12 @@
 #define OK  0 
 
 // Init global vars
-Position2D goku;
-Position2D Dragonballs[DRAGONBALLS_NUMBER];
+Agent goku;
+Dragonball dragonballs[DRAGONBALLS_NUMBER];
+
 byte MAP[MAP_SIZE][MAP_SIZE];
 byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
+
 Stack movements = NULL;
 
 char text[TEXT_BUFFER];

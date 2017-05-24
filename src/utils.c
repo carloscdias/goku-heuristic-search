@@ -60,10 +60,10 @@ void fill_explored_map(byte current_map[MAP_SIZE][MAP_SIZE], Position2D *positio
   int x, y, startX, startY, endX, endY;
 
   startX = value_inside_map_range(position->x - DRAGON_RADAR_DISTANCE);
-  endX = value_inside_map_range(position->x + DRAGON_RADAR_DISTANCE + 1);
+  endX = value_inside_map_range(position->x + DRAGON_RADAR_DISTANCE);
 
   startY = value_inside_map_range(position->y - DRAGON_RADAR_DISTANCE);
-  endY = value_inside_map_range(position->y + DRAGON_RADAR_DISTANCE + 1);
+  endY = value_inside_map_range(position->y + DRAGON_RADAR_DISTANCE);
 
   for(x = startX; x <= endX; x++) {
     for(y = startY; y <= endY; y++) {

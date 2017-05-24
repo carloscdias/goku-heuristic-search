@@ -69,8 +69,8 @@ void explore_search() {
   copy_explored_map(initial_state->explored_map, EXPLORED_MAP);
 
   // Copy current Goku position
-  initial_state->current_position.x = goku.x;
-  initial_state->current_position.y = goku.y;
+  initial_state->current_position.x = goku.current_position.x;
+  initial_state->current_position.y = goku.current_position.y;
 
   explore_problem.initial_state = initial_state;
 

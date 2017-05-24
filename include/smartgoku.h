@@ -8,7 +8,7 @@
 #define GOKU_SEARCH_VELOCITY  300
 
 typedef struct {
-  byte showGrid, showDragonballs, showInfo, showDragonRadar;
+  byte showGrid, showDragonballs, showInfo, showDragonRadar, caughtDragonballs;
   unsigned int currentTotalCost;
   Position2D lastPosition;
 } BoardSetup;
