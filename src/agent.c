@@ -41,17 +41,11 @@ void initBoard() {
   board.showGrid = 1;
   board.showDragonRadar = 1;
   board.currentTotalCost = 0;
+  board.caughtDragonballs = 0;
 }
 
 // Controls
 static void controls(int key, int xScreen, int yScreen) {
-  Position2D *position;
-  byte x, y;
-
-  // Old values
-  x = goku.x;
-  y = goku.y;
-
   switch(key) {
     case GLUT_KEY_UP:
       moveGokuUp();
@@ -65,13 +59,6 @@ static void controls(int key, int xScreen, int yScreen) {
     case GLUT_KEY_RIGHT:
       moveGokuRight();
       break;
-  }
-
-  if((x != goku.x) || (y != goku.y)) {
-    // Moved
-    position = create_position(goku.x, goku.y);
-    board.currentTotalCost += movement_cost(position);
-    free(position);
   }
 }
 
@@ -96,15 +83,17 @@ static void configs(unsigned char key, int x, int y) {
       break;
     case ' ':
       // Restart
-      board.currentTotalCost = 0;
+      board.caughtDragonballs = board.currentTotalCost = 0;
       initDragonballs(NULL);
       initAgent(NULL);
+      init_explored_map(EXPLORED_MAP);
+      fill_explored_map(EXPLORED_MAP, &goku.current_position);
       break;
     case 's':
       // Start/Stop search following the path
       // explore_search();
-      printf("Cost: %d\n", path_cost(goku.x, goku.y, 40, 7));
-      path_search(goku.x, goku.y, 40, 7);
+      printf("Cost: %d\n", path_cost(goku.current_position.x, goku.current_position.y, 40, 7));
+      path_search(goku.current_position.x, goku.current_position.y, 40, 7);
       break;
   }
 }
@@ -137,11 +126,11 @@ void initMap(char *filename)
 // Init agent position
 void initAgent(Position2D *position) {
   if (position != NULL) {
-    goku.x = position->x;
-    goku.y = position->y;
+    goku.last_position.x = goku.current_position.x = position->x;
+    goku.last_position.y = goku.current_position.y = position->y;
   } else {
-    goku.x = 19;
-    goku.y = 22;
+    goku.last_position.x = goku.current_position.x = 19;
+    goku.last_position.y = goku.current_position.y = 22;
   }
 }
 
@@ -153,40 +142,42 @@ void initDragonballs(Position2D *positions[]) {
 
   for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
     if(positions != NULL && positions[i] != NULL) {
-      Dragonballs[i].x = positions[i]->x;
-      Dragonballs[i].y = positions[i]->y;
+      dragonballs[i].x = positions[i]->x;
+      dragonballs[i].y = positions[i]->y;
     } else {
-      Dragonballs[i].x = (byte)(rand() % MAP_SIZE);
-      Dragonballs[i].y = (byte)(rand() % MAP_SIZE);
+      dragonballs[i].x = (byte)(rand() % MAP_SIZE);
+      dragonballs[i].y = (byte)(rand() % MAP_SIZE);
     }
+
+    dragonballs[i].seen = dragonballs[i].caught = 0;
   }
 }
 
 // Move agent left one time
 void moveGokuLeft() {
-  if (goku.x > 0) {
-    goku.x--;
+  if (goku.current_position.x > 0) {
+    goku.current_position.x--;
   }
 }
 
 // Move agent right one time
 void moveGokuRight() {
-  if (goku.x < MAP_SIZE - 1) {
-    goku.x++;
+  if (goku.current_position.x < MAP_SIZE - 1) {
+    goku.current_position.x++;
   }
 }
 
 // Move agent up one time
 void moveGokuUp() {
-  if (goku.y < MAP_SIZE - 1) {
-    goku.y++;
+  if (goku.current_position.y < MAP_SIZE - 1) {
+    goku.current_position.y++;
   }
 }
 
 // Move agent down one time
 void moveGokuDown() {
-  if (goku.y > 0) {
-    goku.y--;
+  if (goku.current_position.y > 0) {
+    goku.current_position.y--;
   }
 }
 
@@ -275,7 +266,7 @@ static void drawMap() {
 // Draw agent goku
 static void drawGoku() {
   glBegin(GL_QUADS);
-  drawUnitSquare(goku.x, goku.y, 0.75f, 0.3125f, 0.30078125f, 1.0f);
+  drawUnitSquare(goku.current_position.x, goku.current_position.y, 0.75f, 0.3125f, 0.30078125f, 1.0f);
   glEnd();
 }
 
@@ -286,7 +277,9 @@ static void drawDragonballs() {
   glBegin(GL_QUADS);
   
   for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
-    drawUnitSquare(Dragonballs[i].x, Dragonballs[i].y, 0.98828125f, 0.60546875f, 0.02734375f, 0.8f);
+    if((board.showDragonballs || dragonballs[i].seen) && (dragonballs[i].caught == NOT_EXPLORED)) {
+      drawUnitSquare(dragonballs[i].x, dragonballs[i].y, 0.98828125f, 0.60546875f, 0.02734375f, 0.8f);
+    }
   }
 
   glEnd();
@@ -299,10 +292,10 @@ static void drawDragonRadar() {
 
   glBegin(GL_QUADS);
 
-  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y + DRAGON_RADAR_DISTANCE + 1);
-  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y + DRAGON_RADAR_DISTANCE + 1);
-  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y - DRAGON_RADAR_DISTANCE);
-  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.current_position.x + DRAGON_RADAR_DISTANCE + 1, goku.current_position.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.current_position.x - DRAGON_RADAR_DISTANCE, goku.current_position.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.current_position.x - DRAGON_RADAR_DISTANCE, goku.current_position.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.current_position.x + DRAGON_RADAR_DISTANCE + 1, goku.current_position.y - DRAGON_RADAR_DISTANCE);
 
   glEnd();
 
@@ -314,20 +307,20 @@ static void drawDragonRadar() {
   glBegin(GL_LINES);
 
   // Up
-  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y + DRAGON_RADAR_DISTANCE + 1);
-  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.current_position.x - DRAGON_RADAR_DISTANCE, goku.current_position.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.current_position.x + DRAGON_RADAR_DISTANCE + 1, goku.current_position.y + DRAGON_RADAR_DISTANCE + 1);
 
   // Down
-  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y - DRAGON_RADAR_DISTANCE);
-  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.current_position.x - DRAGON_RADAR_DISTANCE, goku.current_position.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.current_position.x + DRAGON_RADAR_DISTANCE + 1, goku.current_position.y - DRAGON_RADAR_DISTANCE);
 
   // Left
-  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y - DRAGON_RADAR_DISTANCE);
-  glVertex2f(goku.x - DRAGON_RADAR_DISTANCE, goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.current_position.x - DRAGON_RADAR_DISTANCE, goku.current_position.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.current_position.x - DRAGON_RADAR_DISTANCE, goku.current_position.y + DRAGON_RADAR_DISTANCE + 1);
 
   // Right
-  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y - DRAGON_RADAR_DISTANCE);
-  glVertex2f(goku.x + DRAGON_RADAR_DISTANCE + 1, goku.y + DRAGON_RADAR_DISTANCE + 1);
+  glVertex2f(goku.current_position.x + DRAGON_RADAR_DISTANCE + 1, goku.current_position.y - DRAGON_RADAR_DISTANCE);
+  glVertex2f(goku.current_position.x + DRAGON_RADAR_DISTANCE + 1, goku.current_position.y + DRAGON_RADAR_DISTANCE + 1);
 
   glEnd();
 }
@@ -336,7 +329,7 @@ static void drawDragonRadar() {
 static void drawText() {
   byte i, length;
 
-  sprintf(text, "Custo: %d - Posicao: (%d, %d)", board.currentTotalCost, goku.x, goku.y);
+  sprintf(text, "Custo: %d - Posicao: (%d, %d) - Dragonballs: %d", board.currentTotalCost, goku.current_position.x, goku.current_position.y, board.caughtDragonballs);
   length = strlen(text);
 
   //glColor3f(0.0f, 0.0f, 0.0f);
@@ -345,6 +338,23 @@ static void drawText() {
   for(i = 0; i < length; i++) {
     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
   }
+}
+
+// Draw fog
+static void drawFog() {
+  byte x, y;
+  
+  glBegin(GL_QUADS);
+
+  for(x = 0; x < MAP_SIZE; x++) {
+    for(y = 0; y < MAP_SIZE; y++) {
+      if(EXPLORED_MAP[x][y] == NOT_EXPLORED) {
+        drawUnitSquare(x, y, 0, 0, 0, 0.5f);
+      }
+    }
+  }
+
+  glEnd();
 }
 
 // Draw screen
@@ -356,6 +366,9 @@ static void display() {
 
   // Draw visible dragonballs
   drawDragonballs();
+
+  // Draw fog
+  drawFog();
 
   // Draw grid
   if(board.showGrid) {
@@ -380,6 +393,30 @@ static void display() {
 
 // Update function
 static void update(int value) {
+  byte i;
+
+  // Check if agent moved
+  if((goku.current_position.x != goku.last_position.x) || (goku.current_position.y != goku.last_position.y)) {
+    goku.last_position.x = goku.current_position.x;
+    goku.last_position.y = goku.current_position.y;
+
+    board.currentTotalCost += movement_cost(&goku.current_position);
+    fill_explored_map(EXPLORED_MAP, &goku.current_position);
+
+    // Check to see if some dragonball was revealed
+    for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
+      if(EXPLORED_MAP[dragonballs[i].x][dragonballs[i].y]) {
+        dragonballs[i].seen = EXPLORED;
+
+        if((dragonballs[i].caught == NOT_EXPLORED) && (dragonballs[i].x == goku.current_position.x) && (dragonballs[i].y == goku.current_position.y)) {
+          dragonballs[i].caught = EXPLORED;
+          board.caughtDragonballs++;
+        }
+      }
+    }
+
+  }
+
   glutPostRedisplay();
   glutTimerFunc(REFRESH_RATE, update, 0);
 }
@@ -391,12 +428,8 @@ static void followPath(int value) {
   if((movements != NULL) && (!ll_is_empty(movements))) {
     new_position = (Position2D*) st_pop(movements);
 
-    if((goku.x != new_position->x) || (goku.y != new_position->y)) {
-      goku.x = new_position->x;
-      goku.y = new_position->y;
-
-      board.currentTotalCost += movement_cost(new_position);
-    }
+    goku.current_position.x = new_position->x;
+    goku.current_position.y = new_position->y;
 
     free(new_position);
 
