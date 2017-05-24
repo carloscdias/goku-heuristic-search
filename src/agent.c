@@ -88,6 +88,7 @@ static void configs(unsigned char key, int x, int y) {
       initAgent(NULL);
       init_explored_map(EXPLORED_MAP);
       fill_explored_map(EXPLORED_MAP, &goku.current_position);
+      checkSeenDragonballs();
       break;
     case 's':
       // Start/Stop search following the path
@@ -150,6 +151,22 @@ void initDragonballs(Position2D *positions[]) {
     }
 
     dragonballs[i].seen = dragonballs[i].caught = 0;
+  }
+}
+
+// Check if any dragonball is inside dragonradar
+void checkSeenDragonballs() {
+  byte i;
+
+  for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
+    if(EXPLORED_MAP[dragonballs[i].x][dragonballs[i].y]) {
+      dragonballs[i].seen = EXPLORED;
+
+      if((dragonballs[i].caught == NOT_EXPLORED) && (dragonballs[i].x == goku.current_position.x) && (dragonballs[i].y == goku.current_position.y)) {
+        dragonballs[i].caught = EXPLORED;
+        board.caughtDragonballs++;
+      }
+    }
   }
 }
 
@@ -393,8 +410,6 @@ static void display() {
 
 // Update function
 static void update(int value) {
-  byte i;
-
   // Check if agent moved
   if((goku.current_position.x != goku.last_position.x) || (goku.current_position.y != goku.last_position.y)) {
     goku.last_position.x = goku.current_position.x;
@@ -404,17 +419,7 @@ static void update(int value) {
     fill_explored_map(EXPLORED_MAP, &goku.current_position);
 
     // Check to see if some dragonball was revealed
-    for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
-      if(EXPLORED_MAP[dragonballs[i].x][dragonballs[i].y]) {
-        dragonballs[i].seen = EXPLORED;
-
-        if((dragonballs[i].caught == NOT_EXPLORED) && (dragonballs[i].x == goku.current_position.x) && (dragonballs[i].y == goku.current_position.y)) {
-          dragonballs[i].caught = EXPLORED;
-          board.caughtDragonballs++;
-        }
-      }
-    }
-
+    checkSeenDragonballs();
   }
 
   glutPostRedisplay();

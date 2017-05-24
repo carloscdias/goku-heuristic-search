@@ -22,6 +22,8 @@ void initMap(char *);
 void initAgent(Position2D *);
 void initDragonballs(Position2D **);
 
+void checkSeenDragonballs();
+
 void moveGokuLeft();
 void moveGokuRight();
 void moveGokuUp();
