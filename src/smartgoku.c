@@ -13,7 +13,7 @@
 #define OK  0 
 
 // Init global vars
-Position2D Goku;
+Position2D goku;
 Position2D Dragonballs[DRAGONBALLS_NUMBER];
 byte MAP[MAP_SIZE][MAP_SIZE];
 byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
@@ -29,13 +29,13 @@ int main(int argc, char *argv[], char *envp[]) {
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
   glutInitWindowSize(630, 630);
   glutInitWindowPosition(350, 50);
-  glutCreateWindow("Smart Goku");
+  glutCreateWindow("Goku Heuristic Search");
 
   initBoard();
   initMap("Mapa01.txt");
   initAgent(NULL);
   init_explored_map(EXPLORED_MAP);
-  fill_explored_map(EXPLORED_MAP, &Goku);
+  fill_explored_map(EXPLORED_MAP, &goku);
   initDragonballs(NULL);
   initGL();
 

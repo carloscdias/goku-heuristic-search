@@ -17,21 +17,23 @@
 // Simple data structures used accross the program
 typedef unsigned char byte;
 
+// Position in a 2D world
 typedef struct {
   byte x, y;
 } Position2D;
 
+// Importante place to visit
 typedef struct {
-  Position2D dragonball[DRAGONBALLS_NUMBER];
-  byte caught, seen;
-} Dragonballs;
+  Position2D position;
+  byte visited;
+} Place;
 
 // Map
 extern byte MAP[MAP_SIZE][MAP_SIZE];
 extern byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
 
 // Problems to be solved
-extern Problem gokuProblem;
+extern Problem pathProblem;
 extern Problem mapExploreProblem;
 
 // Path to be followed
