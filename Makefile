@@ -3,7 +3,7 @@ CFLAGS=-g -Wall
 INCLUDE=-I./include/
 
 ifeq ($(shell uname), Linux)
-	LIBS=-lGL -lGLU -lglut
+	LIBS=-lGL -lGLU -lglut -lpthread
 else
 	LIBS=-framework OpenGL -framework GLUT
 endif

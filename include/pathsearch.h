@@ -13,10 +13,10 @@ Node * moveRight(const State);
 Action *movements_on_map(State);
 
 // Goal test for this module
-byte reached_destination(State);
+byte reached_destination(Problem*, State);
 
 // Heuristic for this module
-double manhatan_distance_to_destination(State);
+double manhatan_distance_to_destination(Problem*, State);
 
 // Main search for this module
 void path_search(byte, byte, byte, byte);
@@ -26,5 +26,8 @@ unsigned int path_cost(byte, byte, byte, byte);
 
 // Create solution as stack and put it on movements
 void *make_path(Node*);
+
+// Generic search best path function
+void *_path_search(byte, byte, byte, byte, void *(*)(Node*));
 
 #endif

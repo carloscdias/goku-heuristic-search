@@ -1,222 +1,125 @@
 #include <stdlib.h>
 #include <utils.h>
-#include <exploresearch.h>
 #include <pathsearch.h>
-
-// TEMPORARIO
+#include <exploresearch.h>
+#include <float.h>
+#include <pthread.h>
 #include <stdio.h>
 
-// Explore the map problem
-ExploreState *initial_state;
-
-Problem explore_problem = {&initial_state, explored_the_map, movements_on_explore_map};
-
-// Actions
-Action explore_general_node[5] = {exploreUp, exploreDown, exploreLeft, exploreRight, NULL};
-Action explore_low_x_node[4] = {exploreUp, exploreDown, exploreRight, NULL};
-Action explore_low_y_node[4] = {exploreUp, exploreLeft, exploreRight, NULL};
-Action explore_high_x_node[4] = {exploreUp, exploreDown, exploreLeft, NULL};
-Action explore_high_y_node[4] = {exploreDown, exploreLeft, exploreRight, NULL};
-Action explore_corner_top_left_node[3] = {exploreDown, exploreRight, NULL};
-Action explore_corner_top_right_node[3] = {exploreDown, exploreLeft, NULL};
-Action explore_corner_bottom_left_node[3] = {moveUp, exploreRight, NULL};
-Action explore_corner_bottom_right_node[3] = {exploreUp, exploreLeft, NULL};
-
+// Rate map
+double RATE_MAP[MAP_SIZE][MAP_SIZE];
 
 // Print position funtion for debug purposes
 void print_position(Position2D *position) {
   printf("Position: (%d, %d)\n", position->x, position->y);
 }
 
-void print_map(ExploreState *state) {
-  byte x, y;
+// Get rate of cost/explored_area in a path solution
+static void *_get_cost_explore_rate(Node*);
 
-  printf("Printing map...\n");
-
-  for(x = 0; x < MAP_SIZE; x++) {
-    for(y = 0; y < MAP_SIZE; y++) {
-      printf("%d", state->explored_map[x][y]);
-    }
-    printf("\n");
-  }
-}
-
-// Push path to the stack of movements
-void *make_explore_path(Node *solution) {
+// Unitary search function to parallel computing
+void *parallel_searching(void *param) {
   Position2D *position;
 
-  if(!ll_is_empty(movements)) {
-    st_destroy_stack(movements);
-  }
+  position = (Position2D*)param;
 
-  movements = st_create_stack();
+  RATE_MAP[position->x][position->y] = path_cost_explore_rate(goku.current_position.x, goku.current_position.y, position->x, position->y);
 
-  while(solution != NULL) {
-    position = create_position(((ExploreState*)solution->state)->current_position.x, ((ExploreState*)solution->state)->current_position.y);
-    st_push((void*)position, movements);
-    solution = solution->parent;
-  }
+  free(position);
 
-  return movements;
+  return NULL;
 }
 
 // Explore map search
 void explore_search() {
-
-  initial_state = (ExploreState*) malloc(sizeof(ExploreState));
-
-  // Copy current explored map to initial problem state
-  copy_explored_map(initial_state->explored_map, EXPLORED_MAP);
-
-  // Copy current Goku position
-  initial_state->current_position.x = goku.current_position.x;
-  initial_state->current_position.y = goku.current_position.y;
-
-  explore_problem.initial_state = initial_state;
-
-  A_star_search(&explore_problem, number_of_unexplored_regions, compare_maps, make_explore_path);
-}
-
-// Count the number of unexplored regions
-double number_of_unexplored_regions(State state) {
-  double unexplored_regions = 0.0;
+  Position2D next_place, *position;
+  pthread_t tid[MAP_SIZE][MAP_SIZE];
   byte x, y;
+  double current_best;
 
+  // pthread this shit!
   for(x = 0; x < MAP_SIZE; x++) {
     for(y = 0; y < MAP_SIZE; y++) {
-      if(((ExploreState*)state)->explored_map[x][y] == 0) {
-        unexplored_regions += 1.0;
+      position = create_position(x, y);
+      pthread_create(&tid[x][y], NULL, parallel_searching, position);
+    }
+  }
+
+  // Wait all threads finish processing 
+  for(x = 0; x < MAP_SIZE; x++) {
+    for(y = 0; y < MAP_SIZE; y++) {
+      pthread_join(tid[x][y], NULL);
+    }
+  }
+
+  current_best = DBL_MAX;
+
+  // Get the min value in matrix
+  for(x = 0; x < MAP_SIZE; x++) {
+    for(y = 0; y < MAP_SIZE; y++) {
+      if(RATE_MAP[x][y] < current_best) {
+        current_best = RATE_MAP[x][y];
+        next_place.x = x;
+        next_place.y = y;
       }
     }
   }
 
-  return unexplored_regions;
+  // Do the movement
+  path_search(goku.current_position.x, goku.current_position.y, next_place.x, next_place.y);
 }
 
-// Goal for the explore the map
-byte explored_the_map(State state) {
-  print_map((ExploreState*)state);
-  return (number_of_unexplored_regions(state) <= EXPLORE_ERROR);
+// Get the rate explore/cost
+void *_get_cost_explore_rate(Node *solution) {
+  byte map[MAP_SIZE][MAP_SIZE];
+  double *cost;
+  unsigned int explored_region;
+
+  cost = malloc(sizeof(double));
+  *cost = solution->path_cost;
+
+  init_explored_map(map);
+
+  while(solution != NULL) {
+    fill_explored_map(map, (Position2D*)solution->state);
+    solution = solution->parent;
+  }
+
+  explored_region = count_explored_regions(map, EXPLORED_MAP);
+
+  if (explored_region == 0) {
+    *cost = DBL_MAX;
+  } else {
+    *cost = *cost / explored_region;
+  }
+
+  return ((void*)cost);
 }
 
-// Compare maps
-byte compare_maps(State state1, State state2) {
+// Returns only the path cost/explore rate
+double path_cost_explore_rate(byte x1, byte y1, byte x2, byte y2) {
+  double cost, *tmp;
+
+  tmp = (double*) _path_search(x1, y1, x2, y2, _get_cost_explore_rate);
+  cost = *tmp;
+  free(tmp);
+
+  return cost;
+}
+
+// Count number of explored regions
+unsigned int count_explored_regions(byte current_map[MAP_SIZE][MAP_SIZE], const byte explored_map[MAP_SIZE][MAP_SIZE]) {
   byte x, y;
-  unsigned int errors = 0;
+  unsigned int explored_regions = 0;
 
   for(x = 0; x < MAP_SIZE; x++) {
     for(y = 0; y < MAP_SIZE; y++) {
-      if(((ExploreState*)state1)->explored_map[x][y] != ((ExploreState*)state2)->explored_map[x][y]) {
-        errors++;
+      if((current_map[x][y] == EXPLORED) && (explored_map[x][y] == NOT_EXPLORED)) {
+        explored_regions++;
       }
     }
   }
 
-  return (errors == 0);
-}
-
-// Actions
-Node * exploreUp(const State state) {
-  ExploreState *es, *new_es;
-
-  es = (ExploreState*) state;
-  new_es = (ExploreState*) malloc(sizeof(ExploreState));
-
-  new_es->current_position.x = es->current_position.x;
-  new_es->current_position.y = es->current_position.y + 1;
-
-  copy_explored_map(new_es->explored_map, es->explored_map);
-  fill_explored_map(new_es->explored_map, &new_es->current_position);
-
-  return create_node((State)new_es, movement_cost(&new_es->current_position), NULL);
-}
-
-Node * exploreDown(const State state) {
-  ExploreState *es, *new_es;
-
-  es = (ExploreState*) state;
-  new_es = (ExploreState*) malloc(sizeof(ExploreState));
-
-  new_es->current_position.x = es->current_position.x;
-  new_es->current_position.y = es->current_position.y - 1;
-
-  copy_explored_map(new_es->explored_map, es->explored_map);
-  fill_explored_map(new_es->explored_map, &new_es->current_position);
-
-  return create_node((State)new_es, movement_cost(&new_es->current_position), NULL);
-}
-
-Node * exploreLeft(const State state) {
-  ExploreState *es, *new_es;
-
-  es = (ExploreState*) state;
-  new_es = (ExploreState*) malloc(sizeof(ExploreState));
-
-  new_es->current_position.x = es->current_position.x - 1;
-  new_es->current_position.y = es->current_position.y;
-
-  copy_explored_map(new_es->explored_map, es->explored_map);
-  fill_explored_map(new_es->explored_map, &new_es->current_position);
-
-  return create_node((State)new_es, movement_cost(&new_es->current_position), NULL);
-}
-
-Node * exploreRight(const State state) {
-  ExploreState *es, *new_es;
-
-  es = (ExploreState*) state;
-  new_es = (ExploreState*) malloc(sizeof(ExploreState));
-
-  new_es->current_position.x = es->current_position.x + 1;
-  new_es->current_position.y = es->current_position.y;
-
-  copy_explored_map(new_es->explored_map, es->explored_map);
-  fill_explored_map(new_es->explored_map, &new_es->current_position);
-
-  return create_node((State)new_es, movement_cost(&new_es->current_position), NULL);
-}
-
-// Get possible actions
-Action *movements_on_explore_map(State state) {
-  Position2D position;
-
-  position.x = ((ExploreState*) state)->current_position.x;
-  position.y = ((ExploreState*) state)->current_position.y;
-
-  if(position.x == 0) {
-
-    if(position.y == 0) {
-      return explore_corner_bottom_left_node;
-    }
-
-    if(position.y == (MAP_SIZE - 1)) {
-      return explore_corner_top_left_node;
-    }
-
-    return explore_low_x_node;
-  }
-
-  if (position.x == (MAP_SIZE - 1)) {
-
-    if(position.y == 0) {
-      return explore_corner_bottom_right_node;
-    }
-
-    if(position.y == (MAP_SIZE - 1)) {
-      return explore_corner_top_right_node;
-    }
-
-    return explore_high_x_node;
-  }
-
-  if(position.y == (MAP_SIZE - 1)) {
-    return explore_high_y_node;
-  }
-
-  if(position.y == 0) {
-    return explore_low_y_node;
-  }
-
-  return explore_general_node;
+  return explored_regions;
 }
 

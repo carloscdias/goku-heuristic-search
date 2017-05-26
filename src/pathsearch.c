@@ -2,18 +2,6 @@
 #include <utils.h>
 #include <pathsearch.h>
 
-// Internal search function
-static void *_path_search(byte, byte, byte, byte, void *(*)(Node*));
-
-// Internal function to retrive a paths cost ignoring the path itself
-static void *_get_cost(Node*);
-
-// Path finding problem
-Position2D *initial_state;
-Position2D *goal_state;
-
-Problem pathProblem = {NULL, reached_destination, movements_on_map};
-
 // Actions
 Action general_node[5] = {moveUp, moveDown, moveLeft, moveRight, NULL};
 Action low_x_node[4] = {moveUp, moveDown, moveRight, NULL};
@@ -44,26 +32,19 @@ void *make_path(Node *solution) {
   return movements;
 }
 
-// Get the cost for solution
-void *_get_cost(Node *solution) {
-  unsigned int *cost;
-
-  cost = malloc(sizeof(unsigned int));
-  *cost = (unsigned int) solution->path_cost;
-
-  return ((void*)cost);
-}
-
 // Main search function for this module
 void *_path_search(byte x1, byte y1, byte x2, byte y2, void *(*solution)(Node*)) {
-  void *data;
-  initial_state = create_position(x1, y1);
-  goal_state = create_position(x2, y2);
-  pathProblem.initial_state = initial_state;
+  Problem path_problem;
+  void *data; 
 
-  data = A_star_search(&pathProblem, manhatan_distance_to_destination, compare_positions, solution);
+  path_problem.initial_state = create_position(x1, y1);
+  path_problem.final_state = create_position(x2, y2);
+  path_problem.goal_test = reached_destination;
+  path_problem.actions = movements_on_map;
 
-  free(goal_state);
+  data = A_star_search(&path_problem, manhatan_distance_to_destination, compare_positions, solution);
+
+  free(path_problem.final_state);
 
   return data;
 }
@@ -71,18 +52,6 @@ void *_path_search(byte x1, byte y1, byte x2, byte y2, void *(*solution)(Node*))
 // Path search push to the stack of movements the best path between two points
 void path_search(byte x1, byte y1, byte x2, byte y2) {
   _path_search(x1, y1, x2, y2, make_path);
-}
-
-// Second main function for this module
-// Returns only the path cost for two points
-unsigned int path_cost(byte x1, byte y1, byte x2, byte y2) {
-  unsigned int cost, *tmp;
-
-  tmp = (unsigned int*) _path_search(x1, y1, x2, y2, _get_cost);
-  cost = *tmp;
-  free(tmp);
-
-  return cost;
 }
 
 // Get possible actions
@@ -164,15 +133,16 @@ Node * moveRight(const State state) {
   return create_node((State)new_position, movement_cost(new_position), NULL);
 }
 
-// Goal test function
-byte reached_destination(State state) {
-  return compare_positions((Position2D*) state, goal_state);
+// Goal test for this module
+byte reached_destination(Problem *problem, State state) {
+  return compare_positions((Position2D*)problem->final_state, (Position2D*)state);
 }
 
 // Heuristic function for this problem
-double manhatan_distance_to_destination(State state) {
-  Position2D *position;
+double manhatan_distance_to_destination(Problem *problem, State state) {
+  Position2D *position, *destination;
   position = (Position2D*) state;
-  return (double)(abs(position->x - goal_state->x) + abs(position->y - goal_state->y));
+  destination = (Position2D*) problem->final_state;
+  return (double)(abs(position->x - destination->x) + abs(position->y - destination->y));
 }
 

@@ -38,10 +38,6 @@ typedef struct {
 extern byte MAP[MAP_SIZE][MAP_SIZE];
 extern byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
 
-// Problems to be solved
-extern Problem pathProblem;
-extern Problem mapExploreProblem;
-
 // Path to be followed
 extern Stack movements;
 

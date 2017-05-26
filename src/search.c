@@ -31,7 +31,7 @@ unsigned char compare_nodes(void *node1, void *node2) {
 }
 
 // A Star algorithm
-void *A_star_search(Problem *problem, double (*h)(State), unsigned char (*cmp_state_function)(void*, void*), void *(*solution)(Node*)){
+void *A_star_search(Problem *problem, double (*h)(Problem*, State), unsigned char (*cmp_state_function)(void*, void*), void *(*solution)(Node*)){
   Node *node, *child, *in_frontier;
   PQueue *frontier, *explored;
   Action *actions_list;
@@ -57,7 +57,7 @@ void *A_star_search(Problem *problem, double (*h)(State), unsigned char (*cmp_st
   while(!is_empty(frontier)) {
     node = (Node*) pop(frontier);
 
-    if(problem->goal_test(node->state)) {
+    if(problem->goal_test(problem, node->state)) {
       memo_solution = solution(node);
       destroy_pqueue(frontier);
       destroy_pqueue(explored);
@@ -75,7 +75,7 @@ void *A_star_search(Problem *problem, double (*h)(State), unsigned char (*cmp_st
       child = make_child(problem, node, actions_list[i]);
 
       if(!(is_in_queue(child->state, cmp_state_function, explored) || is_in_queue(child, compare_nodes, frontier))) {
-        insert((void*)child, child->path_cost + h(child->state), frontier);
+        insert((void*)child, child->path_cost + h(problem, child->state), frontier);
       } else if((in_frontier = (Node*) get((void*)child, compare_nodes, frontier)) && (in_frontier->path_cost > child->path_cost)) {
         // replace node in frontier with child
         remove_pqueue_node((void*)in_frontier, compare_nodes, frontier);
