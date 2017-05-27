@@ -23,7 +23,12 @@ void *parallel_searching(void *param) {
 
   position = (Position2D*)param;
 
-  RATE_MAP[position->x][position->y] = path_cost_explore_rate(goku.current_position.x, goku.current_position.y, position->x, position->y);
+  if(MAP[position->x][position->y] == 'G') {
+    RATE_MAP[position->x][position->y] = path_cost_explore_rate(goku.current_position.x, goku.current_position.y, position->x, position->y);
+  } else {
+    RATE_MAP[position->x][position->y] = DBL_MAX;
+  }
+
 
   free(position);
 

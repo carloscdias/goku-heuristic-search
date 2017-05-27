@@ -233,18 +233,20 @@ void search() {
   }
 
   // Se não existe nenhuma esfera visível
-  if(tracked_dragonballs->number_of_elements == 0) {
+  if(ll_is_empty(movements) && tracked_dragonballs->number_of_elements == 0) {
     // Explore o mapa
     explore_search();
-  } else if(tracked_dragonballs->number_of_elements == 1) {
+  } else if(tracked_dragonballs->number_of_elements > 0) {
     // Para apenas uma esfera visível, pegue-a
-    dragonball_to_catch = (Place*) st_pop(tracked_dragonballs);
-    path_search(goku.current_position.x, goku.current_position.y, dragonball_to_catch->position.x, dragonball_to_catch->position.y);
-    free(dragonball_to_catch);
-  } else {
-    // Para mais de uma esfera visível simultâneamente
-    // Execute o cacheiro viajante
-    printf("Not implemented ;)\n");
+    if(tracked_dragonballs->number_of_elements == 1) {
+      dragonball_to_catch = (Place*) st_pop(tracked_dragonballs);
+      path_search(goku.current_position.x, goku.current_position.y, dragonball_to_catch->position.x, dragonball_to_catch->position.y);
+      free(dragonball_to_catch);
+    } else {
+      // Para mais de uma esfera visível simultâneamente
+      // Execute o cacheiro viajante
+      printf("Not implemented ;)\n");
+    }
   }
 
 }
