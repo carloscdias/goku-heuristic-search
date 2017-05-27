@@ -7,8 +7,11 @@
 #define REFRESH_RATE          30
 #define GOKU_SEARCH_VELOCITY  300
 
+typedef enum {IDLE, START} Status;
+
 typedef struct {
-  byte showGrid, showDragonballs, showInfo, showDragonRadar, caughtDragonballs, isSearching, isFollowing;
+  byte showGrid, showDragonballs, showInfo, showDragonRadar, caughtDragonballs;
+  Status status;
   unsigned int currentTotalCost;
 } BoardSetup;
 

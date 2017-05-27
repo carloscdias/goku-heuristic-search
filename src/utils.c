@@ -44,6 +44,19 @@ Position2D *create_position(byte x, byte y) {
   return position;
 }
 
+// Create position on heap
+Place *create_place(byte x, byte y, byte visited) {
+  Place *place;
+
+  place = (Place*) malloc(sizeof(Place));
+
+  place->position.x = x;
+  place->position.y = y;
+  place->visited = visited;
+
+  return place;
+}
+
 // Init unexplored map
 void init_explored_map(byte current_map[MAP_SIZE][MAP_SIZE]) {
   byte x, y;

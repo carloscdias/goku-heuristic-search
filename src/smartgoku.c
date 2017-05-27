@@ -20,6 +20,7 @@ byte MAP[MAP_SIZE][MAP_SIZE];
 byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
 
 Stack movements = NULL;
+Stack tracked_dragonballs = NULL;
 
 char text[TEXT_BUFFER];
 
@@ -33,6 +34,7 @@ int main(int argc, char *argv[], char *envp[]) {
   glutInitWindowPosition(350, 50);
   glutCreateWindow("Goku Heuristic Search");
 
+  tracked_dragonballs = st_create_stack();
   initBoard();
   initMap("Mapa01.txt");
   initAgent(NULL);

@@ -18,6 +18,7 @@
 static void update(int);
 static void followPath(int);
 static void display();
+static void search();
 
 // Init rand with current time
 static void initRand() {
@@ -42,8 +43,7 @@ void initBoard() {
   board.showDragonRadar = 1;
   board.currentTotalCost = 0;
   board.caughtDragonballs = 0;
-  board.isSearching = 0;
-  board.isFollowing = 0;
+  board.status = IDLE;
 }
 
 // Controls
@@ -85,7 +85,8 @@ static void configs(unsigned char key, int x, int y) {
       break;
     case ' ':
       // Restart
-      board.isSearching = board.caughtDragonballs = board.currentTotalCost = 0;
+      board.caughtDragonballs = board.currentTotalCost = 0;
+      board.status = IDLE;
       initDragonballs(NULL);
       initAgent(NULL);
       init_explored_map(EXPLORED_MAP);
@@ -93,8 +94,17 @@ static void configs(unsigned char key, int x, int y) {
       checkSeenDragonballs();
       break;
     case 's':
-      // Start/Stop search following the path
-      toggle(&board.isSearching);
+      // Start/Stop search
+      if(board.status == IDLE) {
+        board.status = START;
+      } else {
+        // Stop search
+        board.status = IDLE;
+        // Destroy path to be followed
+        st_destroy_stack(movements);
+      }
+
+      search();
       break;
   }
 }
@@ -156,11 +166,18 @@ void initDragonballs(Position2D *positions[]) {
 
 // Check if any dragonball is inside dragonradar
 void checkSeenDragonballs() {
+  Place *dragonball_to_catch;
   byte i;
 
   for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
     if(EXPLORED_MAP[dragonballs[i].x][dragonballs[i].y]) {
-      dragonballs[i].seen = EXPLORED;
+      if(dragonballs[i].seen == NOT_EXPLORED) {
+        dragonballs[i].seen = EXPLORED;
+
+        // Add to stack
+        dragonball_to_catch = create_place(dragonballs[i].x, dragonballs[i].y, NOT_EXPLORED);
+        st_push((void*)dragonball_to_catch, tracked_dragonballs);
+      }
 
       if((dragonballs[i].caught == NOT_EXPLORED) && (dragonballs[i].x == goku.current_position.x) && (dragonballs[i].y == goku.current_position.y)) {
         dragonballs[i].caught = EXPLORED;
@@ -200,25 +217,34 @@ void moveGokuDown() {
 
 // Search algorithm
 void search() {
-  byte i;
+  Place *dragonball_to_catch;
 
-  // Pega todas as esferas visíveis, uma por vez
-  for(i = 0; i < DRAGONBALLS_NUMBER; i++) {
-    if((board.isFollowing == NOT_EXPLORED) && (dragonballs[i].seen == EXPLORED) && (dragonballs[i].caught == NOT_EXPLORED)) {
-      path_search(goku.current_position.x, goku.current_position.y, dragonballs[i].x, dragonballs[i].y);
-      board.isFollowing = EXPLORED;
-      return;
-    }
-  }
-
-  if(board.isFollowing == EXPLORED && ll_is_empty(movements)) {
-    board.isFollowing = NOT_EXPLORED;
+  // IDLE quer dizer que a busca está desligada
+  if(board.status == IDLE) {
     return;
   }
 
-  if(board.isFollowing == NOT_EXPLORED) {
+  // Se já achou todas as esferas
+  if(board.caughtDragonballs == DRAGONBALLS_NUMBER) {
+    // Encerra a busca e volta para a origem
+    board.status = IDLE;
+    path_search(goku.current_position.x, goku.current_position.y, 19, 22);
+    return;
+  }
+
+  // Se não existe nenhuma esfera visível
+  if(tracked_dragonballs->number_of_elements == 0) {
+    // Explore o mapa
     explore_search();
-    board.isFollowing = EXPLORED;
+  } else if(tracked_dragonballs->number_of_elements == 1) {
+    // Para apenas uma esfera visível, pegue-a
+    dragonball_to_catch = (Place*) st_pop(tracked_dragonballs);
+    path_search(goku.current_position.x, goku.current_position.y, dragonball_to_catch->position.x, dragonball_to_catch->position.y);
+    free(dragonball_to_catch);
+  } else {
+    // Para mais de uma esfera visível simultâneamente
+    // Execute o cacheiro viajante
+    printf("Not implemented ;)\n");
   }
 
 }
@@ -445,10 +471,8 @@ static void update(int value) {
 
     // Check to see if some dragonball was revealed
     checkSeenDragonballs();
-  }
 
-  // Search logic goes here
-  if(board.isSearching == EXPLORED) {
+    // Do the search!
     search();
   }
 

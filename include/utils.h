@@ -33,6 +33,12 @@ typedef struct {
   byte x, y, seen, caught;
 } Dragonball;
 
+// Place to be in the world
+typedef struct {
+  Position2D position;
+  byte visited;
+} Place;
+
 
 // Map
 extern byte MAP[MAP_SIZE][MAP_SIZE];
@@ -40,6 +46,7 @@ extern byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
 
 // Path to be followed
 extern Stack movements;
+extern Stack tracked_dragonballs;
 
 // Entity variables
 extern Agent goku;
@@ -57,6 +64,9 @@ byte compare_positions(void*, void*);
 
 // Create 2D position on heap
 Position2D *create_position(byte, byte);
+
+// Create a place to visit on heap
+Place *create_place(byte, byte, byte);
 
 // Init map of explored region with NOT_EXPLORED constant
 void init_explored_map(byte[MAP_SIZE][MAP_SIZE]);
