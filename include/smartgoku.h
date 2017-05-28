@@ -1,34 +1,41 @@
 #ifndef _SMART_GOKU_H_
 #define _SMART_GOKU_H_
 
-#include <utils.h>
+#include <ghsdata.h>
 
+// Constants for visual elements like
+// text buffer, refresh rate and
+// agent update rate
 #define TEXT_BUFFER           50
 #define REFRESH_RATE          30
 #define GOKU_SEARCH_VELOCITY  300
 
-typedef enum {IDLE, START} Status;
+// Global text buffer
+extern char info[TEXT_BUFFER];
 
-typedef struct {
-  byte showGrid, showDragonballs, showInfo, showDragonRadar, caughtDragonballs;
-  Status status;
-  unsigned int currentTotalCost;
-} BoardSetup;
+// Init global variable
+void init_game(char*, char*);
 
-extern char text[TEXT_BUFFER];
-extern BoardSetup board;
+// Performs the search algorithm
+void search();
 
-void initGL();
-void initBoard();
-void initMap(char *);
-void initAgent(Position2D *);
-void initDragonballs(Position2D **);
+// Restart the game
+void restart();
 
-void checkSeenDragonballs();
+// Check if any dragonball was seen in the last movement
+void check_seen_dragonballs();
 
-void moveGokuLeft();
-void moveGokuRight();
-void moveGokuUp();
-void moveGokuDown();
+// Agent movements
+// Move agent up one position
+void move_goku_up();
+
+// Move agent down one position
+void move_goku_down();
+
+// Move agent left one position
+void move_goku_left();
+
+// Move agent right one position
+void move_goku_right();
 
 #endif

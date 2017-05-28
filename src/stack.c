@@ -1,39 +1,57 @@
 #include <stdlib.h>
 #include <stack.h>
 
-Stack st_create_stack() {
-  Stack stack;
-  stack = (Stack) ll_create_linkedlist();
+// Create stack
+stack_t
+st_create_stack()
+{
+  stack_t stack;
+  stack = (stack_t) ll_create_linkedlist();
   return stack;
 }
 
-void st_destroy_stack(Stack stack) {
-  void *data;
-
-  while (!ll_is_empty(stack)) {
-    data = st_pop(stack);
-    free(data);
-  }
-
-  free(stack);
+// Destroy entire stack and its data
+void
+st_destroy_stack (stack_t stack)
+{
+  st_clear_stack (stack);
+  free (stack);
 }
 
-void st_push(void *data, Stack stack) {
-  LinkedListNode *node;
+// Push new element to top of the stack
+void
+st_push (void *data, stack_t stack)
+{
+  linkedlistnode_t *node;
 
-  node = ll_create_linkedlist_node(data);
-  ll_insert_first_node(node, stack);
+  node = ll_create_linkedlist_node (data);
+  ll_insert_first_node (node, stack);
 }
 
-void *st_pop(Stack stack) {
-  LinkedListNode *node;
+// Pop element from top os the stack
+void
+*st_pop (stack_t stack)
+{
+  linkedlistnode_t *node;
   void *data;
 
-  node = ll_remove_first_node(stack);
+  node = ll_remove_first_node (stack);
   data = node->data;
 
-  free(node);
+  free (node);
 
   return data;
+}
+
+// Clear stack elements
+void
+st_clear_stack (stack_t stack)
+{
+  void *data;
+
+  while (!ll_is_empty (stack)) {
+    data = st_pop (stack);
+    free (data);
+  }
 }
 

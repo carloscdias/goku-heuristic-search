@@ -1,30 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <ghsdata.h>
 #include <smartgoku.h>
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <GLUT/glut.h>
-#endif
-#ifdef __gnu_linux__
-#include <GL/gl.h>
-#include <GL/freeglut.h>
-#endif
+#include <ghsgraphics.h>
 
 #define OK  0 
 
 // Init global vars
-Agent goku;
-Dragonball dragonballs[DRAGONBALLS_NUMBER];
-
-byte MAP[MAP_SIZE][MAP_SIZE];
-byte EXPLORED_MAP[MAP_SIZE][MAP_SIZE];
-
-Stack movements = NULL;
-Stack tracked_dragonballs = NULL;
-
-char text[TEXT_BUFFER];
-
-BoardSetup board;
+game_t game;
+char info[TEXT_BUFFER];
 
 // Main function
 int main(int argc, char *argv[], char *envp[]) {	
@@ -34,15 +18,8 @@ int main(int argc, char *argv[], char *envp[]) {
   glutInitWindowPosition(350, 50);
   glutCreateWindow("Goku Heuristic Search");
 
-  tracked_dragonballs = st_create_stack();
-  initBoard();
-  initMap("Mapa01.txt");
-  initAgent(NULL);
-  init_explored_map(EXPLORED_MAP);
-  fill_explored_map(EXPLORED_MAP, &goku.current_position);
-  initDragonballs(NULL);
-  checkSeenDragonballs();
-  initGL();
+  init_game("Mapa01.txt", NULL);
+  init_opengl();
 
   glutMainLoop();
 

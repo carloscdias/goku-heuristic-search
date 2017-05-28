@@ -2,10 +2,12 @@
 #include <pqueue.h>
 
 // Create queue
-PQueue *create_pqueue() {
-  PQueue *pqueue;
+pqueue_t
+*pq_create_pqueue()
+{
+  pqueue_t *pqueue;
 
-  pqueue = (PQueue*) malloc(sizeof(PQueue));
+  pqueue = (pqueue_t*) malloc(sizeof(pqueue_t));
 
   pqueue->length = 0;
   pqueue->first = pqueue->last = NULL;
@@ -14,51 +16,59 @@ PQueue *create_pqueue() {
 }
 
 // Destroy entire queue
-void destroy_pqueue(PQueue *queue) {
-  PQueueNode *node;
+void
+pq_destroy_pqueue (pqueue_t *queue)
+{
+  pqueuenode_t *node;
 
   node = queue->first;
 
-  while(queue->first != NULL) {
+  while (queue->first != NULL) {
     node = queue->first;
     queue->first = queue->first->next;
-    free(node->data);
-    free(node);
+    free (node->data);
+    free (node);
   }
   
-  free(queue);
+  free (queue);
 }
 
 // Returns true if queue is empty
-unsigned char is_empty(PQueue* queue) {
+unsigned char
+pq_is_empty (pqueue_t* queue)
+{
   return (queue->length == 0);
 }
 
 // Returns true if element is in queue
-unsigned char is_in_queue(void *element, unsigned char (*cmp_function)(void*, void*), PQueue *queue) {
-  return (get(element, cmp_function, queue) != NULL);
+unsigned char
+pq_is_in_queue (void *element, unsigned char (*cmp_function)(void*, void*), pqueue_t *queue)
+{
+  return (pq_get(element, cmp_function, queue) != NULL);
 } 
 
 // Insert node in queue
-void insert(void *data, double priority, PQueue *queue) {
-  PQueueNode *current, *last, *node;
+void
+pq_insert (void *data, double priority, pqueue_t *queue)
+{
+  pqueuenode_t *current, *last, *node;
 
-  node = create_pqueue_node(data, priority);
+  node = pq_create_pqueue_node (data, priority);
 
-  if (is_empty(queue)) {
+  if (pq_is_empty (queue)) {
     queue->first = queue->last = node;
     queue->length++;
     return;
   }
 
-  if(node->priority < queue->first->priority) {
+  if (node->priority < queue->first->priority) {
     node->next = queue->first;
     queue->first = node;
     queue->length++;
     return;
   }
 
-  if(node->priority >= queue->last->priority) {
+  if (node->priority >= queue->last->priority) {
     queue->last->next = node;
     queue->last = node;
     queue->length++;
@@ -68,7 +78,7 @@ void insert(void *data, double priority, PQueue *queue) {
   last = queue->first;
   current = queue->first->next;
 
-  while(current->priority < node->priority) {
+  while (current->priority < node->priority) {
     last = current;
     current = current->next;
   }
@@ -79,32 +89,34 @@ void insert(void *data, double priority, PQueue *queue) {
 }
 
 // Remove node from queue
-void remove_pqueue_node(void *data, unsigned char (*cmp_function)(void*, void*), PQueue *queue) {
-  PQueueNode *current, *last;
+void
+pq_remove_pqueue_node (void *data, unsigned char (*cmp_function)(void*, void*), pqueue_t *queue)
+{
+  pqueuenode_t *current, *last;
 
-  if(is_empty(queue)) {
+  if (pq_is_empty (queue)) {
     return;
   }
 
-  if(cmp_function(data, queue->first->data)) {
-    pop(queue);
+  if (cmp_function(data, queue->first->data)) {
+    pq_pop(queue);
     return;
   }
 
   last = queue->first;
   current = queue->first->next;
 
-  while(current != NULL) {
-    if(cmp_function(data, current->data)) {
+  while (current != NULL) {
+    if (cmp_function(data, current->data)) {
       last->next = current->next;
 
-      if(current == queue->last) {
+      if (current == queue->last) {
         queue->last = last;
       }
 
       queue->length--;
 
-      free(current);
+      free (current);
       return;
     }
 
@@ -114,10 +126,12 @@ void remove_pqueue_node(void *data, unsigned char (*cmp_function)(void*, void*),
 }
 
 // Create pqueue node
-PQueueNode *create_pqueue_node(void *data, double priority) {
-  PQueueNode *node;
+pqueuenode_t
+*pq_create_pqueue_node (void *data, double priority)
+{
+  pqueuenode_t *node;
 
-  node = (PQueueNode*) malloc(sizeof(PQueueNode));
+  node = (pqueuenode_t*) malloc(sizeof(pqueuenode_t));
 
   node->priority = priority;
   node->data = data;
@@ -127,8 +141,10 @@ PQueueNode *create_pqueue_node(void *data, double priority) {
 }
 
 // Get and remove node with lowest priority
-void *pop(PQueue *queue) {
-  PQueueNode *node;
+void
+*pq_pop (pqueue_t *queue)
+{
+  pqueuenode_t *node;
   void *data;
   
   node = queue->first;
@@ -137,24 +153,26 @@ void *pop(PQueue *queue) {
   queue->first = queue->first->next;
   queue->length--;
 
-  free(node);
+  free (node);
 
   return data;
 }
 
 // Retrieve element in queue based in a compare function
-void *get(void *element, unsigned char (*cmp_function)(void*, void*), PQueue *queue) {
-  PQueueNode *node;
+void
+*pq_get (void *element, unsigned char (*cmp_function)(void*, void*), pqueue_t *queue)
+{
+  pqueuenode_t *node;
 
-  if (is_empty(queue)) {
+  if (pq_is_empty(queue)) {
     return NULL;
   }
 
   node = queue->first;
 
-  while(node != NULL) {
+  while (node != NULL) {
 
-    if(cmp_function(element, node->data)) {
+    if (cmp_function(element, node->data)) {
       return node->data;
     }
 

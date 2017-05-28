@@ -1,32 +1,43 @@
 #include <stdlib.h>
 #include <linkedlist.h>
 
-byte ll_is_empty(LinkedList *list) {
+// Returns true if list is empty
+unsigned char
+ll_is_empty (linkedlist_t *list) {
   return (list == NULL || list->first_node == NULL);
 }
 
-LinkedListNode *ll_create_linkedlist_node(void *data) {
-  LinkedListNode *node;
+// Create linked list node
+linkedlistnode_t
+*ll_create_linkedlist_node (void *data)
+{
+  linkedlistnode_t *node;
 
-  node = (LinkedListNode *) malloc(sizeof(LinkedListNode));
+  node = (linkedlistnode_t*) malloc(sizeof(linkedlistnode_t));
   node->data = data;
   node->next = NULL;
 
   return node;
 }
 
-LinkedList *ll_create_linkedlist() {
-  LinkedList *list;
+// Create linked list
+linkedlist_t
+*ll_create_linkedlist()
+{
+  linkedlist_t *list;
 
-  list = (LinkedList *) malloc(sizeof(LinkedList));
+  list = (linkedlist_t*) malloc(sizeof(linkedlist_t));
   list->first_node = list->last_node = NULL;
   list->number_of_elements = 0;
 
   return list;
 }
 
-void ll_insert_first_node(LinkedListNode *node, LinkedList *list) {
-  if (ll_is_empty(list)) {
+// Insert first node in list
+void
+ll_insert_first_node (linkedlistnode_t *node, linkedlist_t *list)
+{
+  if (ll_is_empty (list)) {
     list->first_node = list->last_node = node;
   } else {
     node->next = list->first_node;
@@ -36,8 +47,11 @@ void ll_insert_first_node(LinkedListNode *node, LinkedList *list) {
   list->number_of_elements++;
 }
 
-void ll_insert_last_node(LinkedListNode *node, LinkedList *list) {
-  if (ll_is_empty(list)) {
+// Inser last node in list
+void
+ll_insert_last_node (linkedlistnode_t *node, linkedlist_t *list)
+{
+  if (ll_is_empty (list)) {
     list->first_node = list->last_node = node;
   } else {
     list->last_node->next = node;
@@ -47,10 +61,13 @@ void ll_insert_last_node(LinkedListNode *node, LinkedList *list) {
   list->number_of_elements++;
 }
 
-LinkedListNode *ll_remove_first_node(LinkedList *list) {
-  LinkedListNode *node;
+// Remove first node from list
+linkedlistnode_t
+*ll_remove_first_node (linkedlist_t *list)
+{
+  linkedlistnode_t *node;
 
-  if (ll_is_empty(list)) {
+  if (ll_is_empty (list)) {
     return NULL;
   }
 
@@ -58,17 +75,20 @@ LinkedListNode *ll_remove_first_node(LinkedList *list) {
   list->first_node = list->first_node->next;
   list->number_of_elements--;
 
-  if (ll_is_empty(list)) {
+  if (ll_is_empty (list)) {
     list->last_node = NULL;
   }
 
   return node;
 }
 
-LinkedListNode *ll_remove_last_node(LinkedList *list) {
-  LinkedListNode *node, *tmp;
+// Remove last node from list
+linkedlistnode_t
+*ll_remove_last_node (linkedlist_t *list)
+{
+  linkedlistnode_t *node, *tmp;
 
-  if (ll_is_empty(list)) {
+  if (ll_is_empty (list)) {
     return NULL;
   }
 

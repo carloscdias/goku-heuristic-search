@@ -3,14 +3,22 @@
 
 #include <linkedlist.h>
 
-typedef LinkedList* Stack;
+// Stack data type
+typedef linkedlist_t *stack_t;
 
-Stack st_create_stack();
+// Create stack on the heap
+stack_t st_create_stack();
 
-void st_destroy_stack(Stack);
+// Destroy stack and stack data
+void st_destroy_stack(stack_t);
 
-void st_push(void *, Stack);
+// Push new element to the top of the stack
+void st_push(void *, stack_t);
 
-void *st_pop(Stack);
+// Pop element from the top of the stack
+void *st_pop(stack_t);
+
+// Clear elements of stack
+void st_clear_stack(stack_t);
 
 #endif

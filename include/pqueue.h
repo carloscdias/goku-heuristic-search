@@ -1,42 +1,44 @@
 #ifndef _PQUEUE_H_
 #define _PQUEUE_H_
 
-typedef struct TPQueueNode {
+// Priority queue node
+typedef struct pqueuenode {
   double priority;
   void *data;
-  struct TPQueueNode *next;
-} PQueueNode;
+  struct pqueuenode *next;
+} pqueuenode_t;
 
+// Priority queue
 typedef struct {
   unsigned int length;
-  PQueueNode *first, *last;
-} PQueue;
+  pqueuenode_t *first, *last;
+} pqueue_t;
 
 // Create queue
-PQueue *create_pqueue();
+pqueue_t *pq_create_pqueue();
 
 // Destroy entire queue
-void destroy_pqueue(PQueue*);
+void pq_destroy_pqueue(pqueue_t*);
 
 // Returns true if queue is empty
-unsigned char is_empty(PQueue*);
+unsigned char pq_is_empty(pqueue_t*);
 
 // Returns true if element is in queue
-unsigned char is_in_queue(void*, unsigned char (*)(void*, void*), PQueue*); 
+unsigned char pq_is_in_queue(void*, unsigned char (*)(void*, void*), pqueue_t*); 
 
 // Insert node in queue
-void insert(void*, double, PQueue*);
+void pq_insert(void*, double, pqueue_t*);
 
 // Remove node from queue
-void remove_pqueue_node(void*, unsigned char (*)(void*, void*), PQueue*);
+void pq_remove_pqueue_node(void*, unsigned char (*)(void*, void*), pqueue_t*);
 
 // Create pqueue node
-PQueueNode *create_pqueue_node(void*, double);
+pqueuenode_t *pq_create_pqueue_node(void*, double);
 
 // Get and remove node with low priority
-void *pop(PQueue*);
+void *pq_pop(pqueue_t*);
 
 // Retrieve element in queue based in a compare function
-void *get(void*, unsigned char (*)(void*, void*), PQueue*);
+void *pq_get(void*, unsigned char (*)(void*, void*), pqueue_t*);
 
 #endif

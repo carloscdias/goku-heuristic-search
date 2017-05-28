@@ -1,71 +1,76 @@
 #include <stdlib.h>
-#include <utils.h>
 #include <pathsearch.h>
 
 // Actions
-Action general_node[5] = {moveUp, moveDown, moveLeft, moveRight, NULL};
-Action low_x_node[4] = {moveUp, moveDown, moveRight, NULL};
-Action low_y_node[4] = {moveUp, moveLeft, moveRight, NULL};
-Action high_x_node[4] = {moveUp, moveDown, moveLeft, NULL};
-Action high_y_node[4] = {moveDown, moveLeft, moveRight, NULL};
-Action corner_top_left_node[3] = {moveDown, moveRight, NULL};
-Action corner_top_right_node[3] = {moveDown, moveLeft, NULL};
-Action corner_bottom_left_node[3] = {moveUp, moveRight, NULL};
-Action corner_bottom_right_node[3] = {moveUp, moveLeft, NULL};
+action_t general_node[5]              = {ps_move_up,   ps_move_down,  ps_move_left,  ps_move_right, NULL};
+action_t low_x_node[4]                = {ps_move_up,   ps_move_down,  ps_move_right, NULL};
+action_t low_y_node[4]                = {ps_move_up,   ps_move_left,  ps_move_right, NULL};
+action_t high_x_node[4]               = {ps_move_up,   ps_move_down,  ps_move_left,  NULL};
+action_t high_y_node[4]               = {ps_move_down, ps_move_left,  ps_move_right, NULL};
+action_t corner_top_left_node[3]      = {ps_move_down, ps_move_right, NULL};
+action_t corner_top_right_node[3]     = {ps_move_down, ps_move_left,  NULL};
+action_t corner_bottom_left_node[3]   = {ps_move_up,   ps_move_right, NULL};
+action_t corner_bottom_right_node[3]  = {ps_move_up,   ps_move_left,  NULL};
 
 // Push solution to the movements stack
-void *make_path(Node *solution) {
-  Position2D *position;
+void
+*ps_make_path (node_t *solution)
+{
+  position2d_t *position;
 
-  if(!ll_is_empty(movements)) {
-    st_destroy_stack(movements);
+  if (!ll_is_empty (game.movements)) {
+    st_clear_stack (game.movements);
   }
 
-  movements = st_create_stack();
-
-  while(solution != NULL) {
-    position = create_position(((Position2D*)solution->state)->x, ((Position2D*)solution->state)->y);
-    st_push((void*)position, movements);
+  while (solution != NULL) {
+    position = create_position (((position2d_t*) solution->state)->x, ((position2d_t*) solution->state)->y);
+    st_push ((void*) position, game.movements);
     solution = solution->parent;
   }
 
-  return movements;
+  return game.movements;
 }
 
 // Main search function for this module
-void *_path_search(byte x1, byte y1, byte x2, byte y2, void *(*solution)(Node*)) {
-  Problem path_problem;
+void
+*ps_generic_path_search (byte_t x1, byte_t y1, byte_t x2, byte_t y2, void *(*solution)(node_t*))
+{
+  problem_t path_problem;
   void *data; 
 
-  path_problem.initial_state = create_position(x1, y1);
-  path_problem.final_state = create_position(x2, y2);
-  path_problem.goal_test = reached_destination;
-  path_problem.actions = movements_on_map;
+  path_problem.initial_state  = create_position (x1, y1);
+  path_problem.final_state    = create_position (x2, y2);
+  path_problem.goal_test      = ps_reached_destination;
+  path_problem.actions        = ps_movements_on_map;
 
-  data = A_star_search(&path_problem, manhatan_distance_to_destination, compare_positions, solution);
+  data = as_a_star_search (&path_problem, ps_manhatan_distance_to_destination, compare_positions, solution);
 
-  free(path_problem.final_state);
+  free (path_problem.final_state);
 
   return data;
 }
 
 // Path search push to the stack of movements the best path between two points
-void path_search(byte x1, byte y1, byte x2, byte y2) {
-  _path_search(x1, y1, x2, y2, make_path);
+void
+ps_path_search (byte_t x1, byte_t y1, byte_t x2, byte_t y2)
+{
+  ps_generic_path_search (x1, y1, x2, y2, ps_make_path);
 }
 
 // Get possible actions
-Action *movements_on_map(State state) {
-  Position2D *position;
-  position = (Position2D*) state;
+action_t
+*ps_movements_on_map (state_t state)
+{
+  position2d_t *position;
+  position = (position2d_t*) state;
 
-  if(position->x == 0) {
+  if (position->x == 0) {
 
-    if(position->y == 0) {
+    if (position->y == 0) {
       return corner_bottom_left_node;
     }
 
-    if(position->y == (MAP_SIZE - 1)) {
+    if (position->y == (MAP_SIZE - 1)) {
       return corner_top_left_node;
     }
 
@@ -74,22 +79,22 @@ Action *movements_on_map(State state) {
 
   if (position->x == (MAP_SIZE - 1)) {
 
-    if(position->y == 0) {
+    if (position->y == 0) {
       return corner_bottom_right_node;
     }
 
-    if(position->y == (MAP_SIZE - 1)) {
+    if (position->y == (MAP_SIZE - 1)) {
       return corner_top_right_node;
     }
 
     return high_x_node;
   }
 
-  if(position->y == (MAP_SIZE - 1)) {
+  if (position->y == (MAP_SIZE - 1)) {
     return high_y_node;
   }
 
-  if(position->y == 0) {
+  if (position->y == 0) {
     return low_y_node;
   }
 
@@ -97,52 +102,64 @@ Action *movements_on_map(State state) {
 }
 
 // Actions
-Node * moveUp(const State state) {
-  Position2D *position, *new_position;
-  position = (Position2D*) state;
+node_t
+*ps_move_up (const state_t state)
+{
+  position2d_t *position, *new_position;
+  position = (position2d_t*) state;
 
-  new_position = create_position(position->x, position->y + 1);
+  new_position = create_position (position->x, position->y + 1);
 
-  return create_node((State)new_position, movement_cost(new_position), NULL);
+  return as_create_node ((state_t) new_position, movement_cost (new_position), NULL);
 }
 
-Node * moveDown(const State state) {
-  Position2D *position, *new_position;
-  position = (Position2D*) state;
+node_t
+*ps_move_down (const state_t state)
+{
+  position2d_t *position, *new_position;
+  position = (position2d_t*) state;
 
-  new_position = create_position(position->x, position->y - 1);
+  new_position = create_position (position->x, position->y - 1);
 
-  return create_node((State)new_position, movement_cost(new_position), NULL);
+  return as_create_node((state_t) new_position, movement_cost (new_position), NULL);
 }
 
-Node * moveLeft(const State state) {
-  Position2D *position, *new_position;
-  position = (Position2D*) state;
+node_t
+*ps_move_left (const state_t state)
+{
+  position2d_t *position, *new_position;
+  position = (position2d_t*) state;
 
-  new_position = create_position(position->x - 1, position->y);
+  new_position = create_position (position->x - 1, position->y);
 
-  return create_node((State)new_position, movement_cost(new_position), NULL);
+  return as_create_node((state_t) new_position, movement_cost (new_position), NULL);
 }
 
-Node * moveRight(const State state) {
-  Position2D *position, *new_position;
-  position = (Position2D*) state;
+node_t
+*ps_move_right (const state_t state)
+{
+  position2d_t *position, *new_position;
+  position = (position2d_t*) state;
 
-  new_position = create_position(position->x + 1, position->y);
+  new_position = create_position (position->x + 1, position->y);
 
-  return create_node((State)new_position, movement_cost(new_position), NULL);
+  return as_create_node((state_t) new_position, movement_cost (new_position), NULL);
 }
 
 // Goal test for this module
-byte reached_destination(Problem *problem, State state) {
-  return compare_positions((Position2D*)problem->final_state, (Position2D*)state);
+byte_t
+ps_reached_destination (problem_t *problem, state_t state)
+{
+  return compare_positions ((position2d_t*) problem->final_state, (position2d_t*) state);
 }
 
 // Heuristic function for this problem
-double manhatan_distance_to_destination(Problem *problem, State state) {
-  Position2D *position, *destination;
-  position = (Position2D*) state;
-  destination = (Position2D*) problem->final_state;
-  return (double)(abs(position->x - destination->x) + abs(position->y - destination->y));
+double
+ps_manhatan_distance_to_destination (problem_t *problem, state_t state)
+{
+  position2d_t *position, *destination;
+  position = (position2d_t*) state;
+  destination = (position2d_t*) problem->final_state;
+  return (double)(abs (position->x - destination->x) + abs (position->y - destination->y));
 }
 
