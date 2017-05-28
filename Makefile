@@ -11,11 +11,19 @@ endif
 obj/%.o: src/%.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(INCLUDE)
 
+all: smartgoku geneticpath
+
 smartgoku: obj/smartgoku.o obj/ghsgraphics.o obj/agent.o obj/rateexploresearch.o obj/pathsearch.o obj/astar.o obj/ghsdata.o obj/pqueue.o obj/stack.o obj/linkedlist.o
 	$(CC) -o build/$@ $^ $(CFLAGS) $(LIBS)
 
+geneticpath: obj/geneticpath.o
+	$(CC) -o build/$@ $^ $(CFLAGS) 
+
 run:
 	build/smartgoku
+
+run_geneticpath:
+	build/geneticpath
 
 clean:
 	rm obj/*.o

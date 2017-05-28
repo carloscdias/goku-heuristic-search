@@ -2,17 +2,17 @@
 #include <stack.h>
 
 // Create stack
-stack_t
+m_stack_t
 st_create_stack()
 {
-  stack_t stack;
-  stack = (stack_t) ll_create_linkedlist();
+  m_stack_t stack;
+  stack = (m_stack_t) ll_create_linkedlist();
   return stack;
 }
 
 // Destroy entire stack and its data
 void
-st_destroy_stack (stack_t stack)
+st_destroy_stack (m_stack_t stack)
 {
   st_clear_stack (stack);
   free (stack);
@@ -20,7 +20,7 @@ st_destroy_stack (stack_t stack)
 
 // Push new element to top of the stack
 void
-st_push (void *data, stack_t stack)
+st_push (void *data, m_stack_t stack)
 {
   linkedlistnode_t *node;
 
@@ -30,7 +30,7 @@ st_push (void *data, stack_t stack)
 
 // Pop element from top os the stack
 void
-*st_pop (stack_t stack)
+*st_pop (m_stack_t stack)
 {
   linkedlistnode_t *node;
   void *data;
@@ -45,7 +45,7 @@ void
 
 // Clear stack elements
 void
-st_clear_stack (stack_t stack)
+st_clear_stack (m_stack_t stack)
 {
   void *data;
 

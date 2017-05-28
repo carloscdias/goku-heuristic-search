@@ -66,13 +66,13 @@ typedef struct {
   byte_t explored_map[MAP_SIZE][MAP_SIZE];
 
   // Stack for next movements to be performed
-  stack_t movements;
+  m_stack_t movements;
 
   // Stacks for searching dragonballs
   // Just seen dragonballs are here
-  stack_t seen_dragonballs;
+  m_stack_t seen_dragonballs;
   // Now searching dragonbals are placed here
-  stack_t tracked_dragonballs;
+  m_stack_t tracked_dragonballs;
 } game_t;
 
 // Global variable with game data

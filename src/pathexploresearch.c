@@ -5,7 +5,7 @@
 #include <pathsearch.h>
 #include <pathexploresearch.h>
 
-stack_t explore_path = NULL;
+m_stack_t explore_path = NULL;
 position2d_t *saved_pursuit = NULL;
 
 // Load path file to memory
