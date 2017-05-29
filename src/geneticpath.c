@@ -13,7 +13,8 @@
 
 // Definitions
 typedef struct {
-  unsigned int individual_index, explore_fitness, path_cost_fitness;
+  unsigned int individual_index, explore_fitness, path_cost_fitness, individual_length;
+  position2d_t *individual;
 } fitness_t;
 
 // Global variables
@@ -194,12 +195,32 @@ print_population (int generation, int population_length, int genes_length, posit
   printf("\n--------------------\n");
 }
 
+// individual evaluation function
+void
+*individual_evaluation(void *params)
+{
+  fitness_t *individual;
+
+  individual = (fitness_t*) params;
+  // perform individual evaluation here
+  // set explore and cost fitness
+  return NULL;
+}
+
 // function to evaluate a population
 void
 evaluate(position2d_t **population, int population_length, int genes_length, fitness_t *evaluation)
 {
+  unsigned int i;
+
   // set each individual properties in the fitness array
   // then, order that array based first in the explore, second by path cost
+
+  for (i = 0; i < population_length; i++) {
+    // individual_index, explore_fitness, path_cost_fitness, individual_length, *individual
+    evaluation[i] = (fitness_t) {i, 0, 0, genes_length, population[i]};
+    // launch thread
+  }
 }
 
 // function to generate a new population for the next generation
