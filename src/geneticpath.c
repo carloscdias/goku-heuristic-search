@@ -267,7 +267,8 @@ main (int argc, char *argv[])
   // Do the dirty work...
   // Do stuff here!!!
   while (exit_loop != 1) {
-    printf("Generating stuff...");
+    printf("Generating stuff...\n");
+    sleep(1);
   }
 
   // Save generated population to file
