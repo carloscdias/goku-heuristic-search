@@ -6,7 +6,15 @@
 #include <time.h>
 #include <signal.h>
 
-#define NUMBER_OF_ARGUMENTS   1
+#define NUMBER_OF_ARGUMENTS           1
+
+#define DEFAULT_ELITISM_NUMBER        5
+#define DEFAULT_MUTATION_PERCENTAGE   5
+
+// Definitions
+typedef struct {
+  unsigned int individual_index, explore_fitness, path_cost_fitness;
+} fitness_t;
 
 // Global variables
 volatile sig_atomic_t exit_loop = 0;
@@ -186,6 +194,22 @@ print_population (int generation, int population_length, int genes_length, posit
   printf("\n--------------------\n");
 }
 
+// function to evaluate a population
+void
+evaluate(position2d_t **population, int population_length, int genes_length, fitness_t *evaluation)
+{
+  // set each individual properties in the fitness array
+  // then, order that array based first in the explore, second by path cost
+}
+
+// function to generate a new population for the next generation
+void next_generation(position2d_t ***population, int population_length, int genes_length, fitness_t *evaluation)
+{
+  // first, remember to not change first ELITISM_NUMBER individuals of the evaluation array
+  sleep(1);
+  printf("Doing something...\n");
+}
+
 // Signal handler
 void
 signal_handler (int signo)
@@ -200,13 +224,17 @@ int
 main (int argc, char *argv[])
 {
   char c;
-  int opts_index, generation = 0, genes_length = 0, population_length = 0;
+  int opts_index, generation = 0, genes_length = 0, population_length = 0, elitism = DEFAULT_ELITISM_NUMBER;
+  float mutation = DEFAULT_MUTATION_PERCENTAGE;
   position2d_t **population;
+  fitness_t *evaluation;
   char *filename;
   time_t t;
   struct option opts[] = {
     {"genes",       required_argument,  0,  'g'},
     {"population",  required_argument,  0,  'p'},
+    {"elitism",     required_argument,  0,  'e'},
+    {"mutation",    required_argument,  0,  'm'},
     {0,             0,                  0,   0 }
   };
 
@@ -219,7 +247,7 @@ main (int argc, char *argv[])
   srand((unsigned) time(&t));
 
   // Parse arguments
-  while ((c = getopt_long(argc, argv, "p:g:", opts, &opts_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "p:g:e:m:", opts, &opts_index)) != -1) {
     switch (c)
     {
       case 'p':
@@ -229,6 +257,14 @@ main (int argc, char *argv[])
       case 'g':
         genes_length = atoi(optarg);
         printf("Setting number of genes per individual as %d\n", genes_length);
+        break;
+      case 'e':
+        elitism = atoi(optarg);
+        printf("Setting elitism number for this session as %d\n", elitism);
+        break;
+      case 'm':
+        mutation = atof(optarg);
+        printf("Setting mutation percentage chance for this session as %.3f%%\n", mutation);
         break;
       case '?':
         printf("Dafuq happened???.\n");
@@ -242,7 +278,7 @@ main (int argc, char *argv[])
 
   // Check for required argument
   if ((argc - optind) < NUMBER_OF_ARGUMENTS) {
-    printf("Usage: %s [-p population_number] [-g genes_number] filename\n", argv[0]);
+    printf("Usage: %s [-p population_number] [-g genes_number] [-e elitism_number] [-m mutation_percentage] filename\n", argv[0]);
     exit(EXIT_FAILURE);
   }
 
@@ -264,11 +300,22 @@ main (int argc, char *argv[])
     print_population(generation, population_length, genes_length, population);
   }
 
+  // Allocate memory fo evaluation array
+  evaluation = (fitness_t*) calloc(population_length, sizeof(fitness_t));
+
   // Do the dirty work...
   // Do stuff here!!!
   while (exit_loop != 1) {
-    printf("Generating stuff...\n");
-    sleep(1);
+    // Here we have to evaluate the generated population
+    evaluate(population, population_length, genes_length, evaluation);
+    // based on the evaluation performed on the fitness process
+    // decide wheter individuals should be parents of the new generation
+    // select a few for elitism purposes
+    // generate childs for the next generation
+    // maybe mutate some individual
+    next_generation(&population, population_length, genes_length, evaluation);
+    // maybe print some info about the process...
+    // repeat the process
   }
 
   // Save generated population to file
@@ -276,6 +323,7 @@ main (int argc, char *argv[])
   write_data_to_file(filename, &generation, &population_length, &genes_length, population);
 
   // Deallocate memory for population
+  free(evaluation);
   destroy_population(population_length, population);
 
   // Exit cleanly
