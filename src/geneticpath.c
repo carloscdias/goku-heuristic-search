@@ -19,7 +19,7 @@ game_t game;
 
 // Definitions
 typedef struct {
-  unsigned int individual_index, explore_fitness, path_cost_fitness, individual_length;
+  unsigned int individual_index, fitness, individual_length;
   position2d_t *individual;
 } fitness_t;
 
@@ -263,7 +263,7 @@ add_explored_regions (byte_t current_map[MAP_SIZE][MAP_SIZE], const byte_t explo
 void
 *individual_evaluation(void *params)
 {
-  unsigned int i;
+  unsigned int i, path_cost, explore_rate;
   byte_t last_x, last_y;
   byte_t explored_map[MAP_SIZE][MAP_SIZE];
   explore_path_t *single_path;
@@ -271,8 +271,9 @@ void
 
   individual = (fitness_t*) params;
 
-  // init map
+  // init
   init_explored_map(explored_map);
+  path_cost = 0;
 
   // initial goku position
   last_x = 19;
@@ -282,7 +283,7 @@ void
     single_path = ps_generic_path_search(last_x, last_y,
         individual->individual[i].x, individual->individual[i].y, calculate_single_path);
     // Add calculated values
-    individual->path_cost_fitness += single_path->path_cost;
+    path_cost += single_path->path_cost;
     add_explored_regions(explored_map, single_path->map);
     // new path begining
     last_x = individual->individual[i].x;
@@ -291,7 +292,10 @@ void
     free(single_path);
   }
 
-  individual->explore_fitness = count_explored_regions(explored_map);
+  explore_rate = count_explored_regions(explored_map);
+
+  // Fitness function
+  individual->fitness = explore_rate*explore_rate - path_cost;
 
   return NULL;
 }
@@ -305,19 +309,7 @@ compare_fitness(const void *f1, const void *f2)
   fit1 = (fitness_t*) f1;
   fit2 = (fitness_t*) f2;
 
-  if (fit1->explore_fitness > fit2->explore_fitness) {
-    return -1;
-  } else if (fit1->explore_fitness < fit2->explore_fitness) {
-    return 1;
-  } else {
-    if (fit1->path_cost_fitness < fit2->path_cost_fitness) {
-      return -1;
-    } else if (fit1->path_cost_fitness > fit2->path_cost_fitness) {
-      return 1;
-    }
-  }
-
-  return 0;
+  return (fit2->fitness - fit1->fitness);
 }
 
 // function to evaluate a population
@@ -332,7 +324,7 @@ evaluate(position2d_t **population, const int population_length, int genes_lengt
 
   for (i = 0; i < population_length; i++) {
     // individual_index, explore_fitness, path_cost_fitness, individual_length, *individual
-    evaluation[i] = (fitness_t) {i, 0, 0, genes_length, population[i]};
+    evaluation[i] = (fitness_t) {i, 0, genes_length, population[i]};
     // launch thread
     pthread_create(&tid[i], NULL, individual_evaluation, &(evaluation[i]));
   }
@@ -345,10 +337,12 @@ evaluate(position2d_t **population, const int population_length, int genes_lengt
   // Order the array
   qsort(evaluation, population_length, sizeof(fitness_t), compare_fitness);
   for (i = 0; i < population_length; i++) {
-    printf("Evaluation for %d: { path: %d, explore: %d }\n", i, evaluation[i].path_cost_fitness, evaluation[i].explore_fitness);
+    printf("Evaluation for %d: %d\n", i + 1, evaluation[i].fitness);
   }
 
-  printf("Succeed till now...\n");
+  printf("Best individual till now...\n");
+
+  print_individual(genes_length, population[evaluation[0].individual_index]);
 }
 
 // function to generate a new population for the next generation
