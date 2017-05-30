@@ -38,4 +38,7 @@ void move_goku_left();
 // Move agent right one position
 void move_goku_right();
 
+// Read map from file
+void init_map(char*);
+
 #endif

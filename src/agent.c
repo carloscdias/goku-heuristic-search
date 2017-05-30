@@ -9,9 +9,6 @@
 // Init rand seed
 static void init_rand();
 
-// Read map from file
-static void init_map(char*);
-
 // Init agent position
 static void init_agent(position2d_t*);
 
@@ -73,7 +70,7 @@ restart()
 }
 
 // Read map from file
-static void
+void
 init_map (char *filename)
 {
   int c;

@@ -5,17 +5,28 @@
 #include <unistd.h>
 #include <time.h>
 #include <signal.h>
+#include <pathsearch.h>
+#include <pthread.h>
+#include <smartgoku.h>
 
 #define NUMBER_OF_ARGUMENTS           1
 
 #define DEFAULT_ELITISM_NUMBER        5
 #define DEFAULT_MUTATION_PERCENTAGE   5
 
+// Declare global variable to eliminate warnings
+game_t game;
+
 // Definitions
 typedef struct {
   unsigned int individual_index, explore_fitness, path_cost_fitness, individual_length;
   position2d_t *individual;
 } fitness_t;
+
+typedef struct {
+  unsigned int path_cost;
+  byte_t map[MAP_SIZE][MAP_SIZE];
+} explore_path_t;
 
 // Global variables
 volatile sig_atomic_t exit_loop = 0;
@@ -195,23 +206,126 @@ print_population (int generation, int population_length, int genes_length, posit
   printf("\n--------------------\n");
 }
 
+// Function to calculate path cost and explore rate from a search solution
+void
+*calculate_single_path(node_t *solution)
+{
+  explore_path_t *single_path;
+
+  single_path = (explore_path_t*) malloc(sizeof(explore_path_t));
+  
+  // init variable
+  single_path->path_cost = solution->path_cost;
+  init_explored_map(single_path->map);
+
+  while (solution != NULL) {
+    fill_explored_map(single_path->map, (position2d_t*) solution->state);
+    solution = solution->parent;
+  }
+
+  return ((void*) single_path);
+}
+
+// Count number of explored regions
+unsigned int
+count_explored_regions (const byte_t explored_map[MAP_SIZE][MAP_SIZE])
+{
+  byte_t x, y;
+  unsigned int explored_regions = 0;
+
+  for (x = 0; x < MAP_SIZE; x++) {
+    for (y = 0; y < MAP_SIZE; y++) {
+      if (explored_map[x][y] == EXPLORED) {
+        explored_regions++;
+      }
+    }
+  }
+
+  return explored_regions;
+}
+
+// Add explored regions
+void
+add_explored_regions (byte_t current_map[MAP_SIZE][MAP_SIZE], const byte_t explored_map[MAP_SIZE][MAP_SIZE])
+{
+  byte_t x, y;
+
+  for (x = 0; x < MAP_SIZE; x++) {
+    for (y = 0; y < MAP_SIZE; y++) {
+      if (explored_map[x][y] == EXPLORED) {
+        current_map[x][y] = EXPLORED;
+      }
+    }
+  }
+}
+
 // individual evaluation function
 void
 *individual_evaluation(void *params)
 {
+  unsigned int i;
+  byte_t last_x, last_y;
+  byte_t explored_map[MAP_SIZE][MAP_SIZE];
+  explore_path_t *single_path;
   fitness_t *individual;
 
   individual = (fitness_t*) params;
-  // perform individual evaluation here
-  // set explore and cost fitness
+
+  // init map
+  init_explored_map(explored_map);
+
+  // initial goku position
+  last_x = 19;
+  last_y = 22;
+
+  for (i = 0; i < individual->individual_length; i++) {
+    single_path = ps_generic_path_search(last_x, last_y,
+        individual->individual[i].x, individual->individual[i].y, calculate_single_path);
+    // Add calculated values
+    individual->path_cost_fitness += single_path->path_cost;
+    add_explored_regions(explored_map, single_path->map);
+    // new path begining
+    last_x = individual->individual[i].x;
+    last_y = individual->individual[i].y;
+    // Deallocate memory
+    free(single_path);
+  }
+
+  individual->explore_fitness = count_explored_regions(explored_map);
+
   return NULL;
+}
+
+// Function to compare two fitness
+int
+compare_fitness(const void *f1, const void *f2)
+{
+  fitness_t *fit1, *fit2;
+
+  fit1 = (fitness_t*) f1;
+  fit2 = (fitness_t*) f2;
+
+  if (fit1->explore_fitness > fit2->explore_fitness) {
+    return -1;
+  } else if (fit1->explore_fitness < fit2->explore_fitness) {
+    return 1;
+  } else {
+    if (fit1->path_cost_fitness < fit2->path_cost_fitness) {
+      return -1;
+    } else if (fit1->path_cost_fitness > fit2->path_cost_fitness) {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 // function to evaluate a population
 void
-evaluate(position2d_t **population, int population_length, int genes_length, fitness_t *evaluation)
+evaluate(position2d_t **population, const int population_length, int genes_length, fitness_t *evaluation)
 {
   unsigned int i;
+  pthread_t tid[population_length];
 
   // set each individual properties in the fitness array
   // then, order that array based first in the explore, second by path cost
@@ -220,7 +334,21 @@ evaluate(position2d_t **population, int population_length, int genes_length, fit
     // individual_index, explore_fitness, path_cost_fitness, individual_length, *individual
     evaluation[i] = (fitness_t) {i, 0, 0, genes_length, population[i]};
     // launch thread
+    pthread_create(&tid[i], NULL, individual_evaluation, &(evaluation[i]));
   }
+
+  // Wait till every thread on this generation finish
+  for (i = 0; i < population_length; i++) {
+    pthread_join(tid[i], NULL);
+  }
+
+  // Order the array
+  qsort(evaluation, population_length, sizeof(fitness_t), compare_fitness);
+  for (i = 0; i < population_length; i++) {
+    printf("Evaluation for %d: { path: %d, explore: %d }\n", i, evaluation[i].path_cost_fitness, evaluation[i].explore_fitness);
+  }
+
+  printf("Succeed till now...\n");
 }
 
 // function to generate a new population for the next generation
@@ -302,6 +430,8 @@ main (int argc, char *argv[])
     printf("Usage: %s [-p population_number] [-g genes_number] [-e elitism_number] [-m mutation_percentage] filename\n", argv[0]);
     exit(EXIT_FAILURE);
   }
+
+  init_map("Mapa01.txt");
 
   // Set file name
   filename = argv[optind];

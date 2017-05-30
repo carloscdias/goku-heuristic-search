@@ -16,8 +16,8 @@ all: smartgoku geneticpath
 smartgoku: obj/smartgoku.o obj/ghsgraphics.o obj/agent.o obj/rateexploresearch.o obj/pathsearch.o obj/astar.o obj/ghsdata.o obj/pqueue.o obj/stack.o obj/linkedlist.o
 	$(CC) -o build/$@ $^ $(CFLAGS) $(LIBS)
 
-geneticpath: obj/geneticpath.o
-	$(CC) -o build/$@ $^ $(CFLAGS) 
+geneticpath: obj/geneticpath.o obj/agent.o obj/rateexploresearch.o obj/pathsearch.o obj/astar.o obj/ghsdata.o obj/pqueue.o obj/stack.o obj/linkedlist.o
+	$(CC) -o build/$@ $^ $(CFLAGS) -lpthread 
 
 run:
 	build/smartgoku
