@@ -346,7 +346,8 @@ evaluate(position2d_t **population, const int population_length, int genes_lengt
 }
 
 // function to generate a new population for the next generation
-void next_generation(position2d_t ***population, int population_length, int genes_length, fitness_t *evaluation)
+void
+next_generation(position2d_t ***population, int population_length, int genes_length, fitness_t *evaluation)
 {
   // first, remember to not change first ELITISM_NUMBER individuals of the evaluation array
   sleep(1);
