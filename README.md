@@ -6,18 +6,28 @@ Explore a 2D unknown environment and retrieve the seven dragonballs with the lea
 
 ![Running program](https://raw.githubusercontent.com/carloscdias/goku-heuristic-search/master/images/example.png)
 
+## Controls
+
+ * `s` turn on/off search
+ * `g` turn on/off grid view on the map
+ * `r` turn on/off radar view on the map
+ * `d` turn on/off unknown dragonballs view on the map
+ * `i` turn on/off information text view on the map
+ * `<space>` restart everything
+ * `<up_arrow><down_arrow><left_arrow><right_arrow>` moves goku to up, down, left and right respectively
+
 ## Search Algorithm
 
- * caso não tenha visto nenhuma esfera, explorar o mapa.
- * caso tenha visto uma esfera, calcular o melhor caminho para chegar até a esfera.
- * caso tenha visto mais de uma esfera, calcular o melhor caminho para pegar todas as esferas visíveis
- * caso tenha pego todas as esferas, retornar para a ilha do mestre kame pelo melhor caminho possível
+ * if there isn't any visible dragonball, explore map
+ * if there is one visible dragonball, get it through the path with min cost
+ * if there are more than one dragonball, calculate the best path to retrieve all of them
+ * if got all dragonballs, return to the master Roshi's island
 
 ## Program options
 
- * `-m file` ou `--map file`, carrega um arquivo de definição de mapa.
- * `-d x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,x6,y6,x7,y7` ou `--dragonballs x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,x6,y6,x7,y7`, define a posição das esferas do dragão para a partida.
- * `-e mode`, define o modo de exploração. Cada modo de exploração poderá conter subopções de acordo com o modo.
+ * `-m file` or `--map file`, loads a definition map
+ * `-d x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,x6,y6,x7,y7` or `--dragonballs x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,x6,y6,x7,y7`, sets the dragonballs position
+ * `-e mode`, sets the exploration mode. Each exploration mode may contain suboptions
 
 ### Explore modes
 
