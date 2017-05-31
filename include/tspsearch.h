@@ -8,7 +8,7 @@
  */
 
 typedef struct {
-  position2d_t position;
+  position2d_t *position;
   m_stack_t places_to_visit;
 } tsp_state_t;
 
