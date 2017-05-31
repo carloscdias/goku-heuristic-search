@@ -13,6 +13,7 @@ char info[TEXT_BUFFER];
 int main(int argc, char *argv[], char *envp[]) {	
   char c;
   int opts_index;
+  char *dragonballs_text, *token;
   // Program options
   struct option opts[] = {
     {"map",         required_argument,  0,  'm'},
@@ -29,7 +30,14 @@ int main(int argc, char *argv[], char *envp[]) {
         printf("Sets the map filename here.\n");
         break;
       case 'd':
-        printf("Sets dragonballs position here.\n");
+        dragonballs_text = strdup(optarg);
+
+        while ((token = strsep(&dragonballs_text, ",")) != NULL) {
+          atoi(token);
+        }
+
+        free(dragonballs_text);
+        while
         break;
       case 'e':
         printf("Sets explore mode here.\n");
