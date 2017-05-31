@@ -9,7 +9,7 @@
 #include <pthread.h>
 #include <smartgoku.h>
 
-#define NUMBER_OF_ARGUMENTS           1
+#define NUMBER_OF_ARGUMENTS           2
 
 #define DEFAULT_ELITISM_NUMBER        5
 #define DEFAULT_MUTATION_PERCENTAGE   5
@@ -139,6 +139,26 @@ write_data_to_file (char *filename, int *generation, int *population_length, int
   for (i = 0; i < *population_length; i++) {
     fwrite(population[i], sizeof(position2d_t), *genes_length, file);
   }
+
+  fclose(file);
+}
+
+// Write data to file
+void
+write_individual_to_file (char *filename, int genes_length, position2d_t *individual)
+{
+  FILE *file;
+
+  file = fopen(filename, "wb");
+
+  // Check if opened
+  if (file == NULL) {
+    printf("Error opening file %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
+
+  // Write individual
+  fwrite(individual, sizeof(position2d_t), genes_length, file);
 
   fclose(file);
 }
@@ -372,13 +392,14 @@ main (int argc, char *argv[])
   float mutation = DEFAULT_MUTATION_PERCENTAGE;
   position2d_t **population;
   fitness_t *evaluation;
-  char *filename;
+  char *filename, *mapfile = NULL, *output_best_individual = NULL;
   time_t t;
   struct option opts[] = {
     {"genes",       required_argument,  0,  'g'},
     {"population",  required_argument,  0,  'p'},
     {"elitism",     required_argument,  0,  'e'},
     {"mutation",    required_argument,  0,  'm'},
+    {"output",      required_argument,  0,  'o'},
     {0,             0,                  0,   0 }
   };
 
@@ -391,24 +412,23 @@ main (int argc, char *argv[])
   srand((unsigned) time(&t));
 
   // Parse arguments
-  while ((c = getopt_long(argc, argv, "p:g:e:m:", opts, &opts_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "p:g:e:m:o:", opts, &opts_index)) != -1) {
     switch (c)
     {
       case 'p':
         population_length = atoi(optarg);
-        printf("Setting number of individuals per generation as %d.\n", population_length);
         break;
       case 'g':
         genes_length = atoi(optarg);
-        printf("Setting number of genes per individual as %d\n", genes_length);
         break;
       case 'e':
         elitism = atoi(optarg);
-        printf("Setting elitism number for this session as %d\n", elitism);
         break;
       case 'm':
         mutation = atof(optarg);
-        printf("Setting mutation percentage chance for this session as %.3f%%\n", mutation);
+        break;
+      case 'o':
+        output_best_individual = optarg;
         break;
       case '?':
         printf("Dafuq happened???.\n");
@@ -422,14 +442,17 @@ main (int argc, char *argv[])
 
   // Check for required argument
   if ((argc - optind) < NUMBER_OF_ARGUMENTS) {
-    printf("Usage: %s [-p population_number] [-g genes_number] [-e elitism_number] [-m mutation_percentage] filename\n", argv[0]);
+    printf("Usage: %s [-p population_number] [-g genes_number] [-e elitism_number] [-m mutation_percentage] mapfile filename\n", argv[0]);
     exit(EXIT_FAILURE);
   }
 
-  init_map("Mapa01.txt");
-
+  // Set map
+  mapfile = argv[optind];
   // Set file name
-  filename = argv[optind];
+  filename = argv[optind + 1];
+  
+  // Init mapfile
+  init_map(mapfile);
 
   // Check if file exists
   if (access(filename, F_OK) == 0) {
@@ -467,6 +490,11 @@ main (int argc, char *argv[])
   // Save generated population to file
   printf("Saving generation %d to file %s...\n", generation, filename);
   write_data_to_file(filename, &generation, &population_length, &genes_length, population);
+
+  if (output_best_individual != NULL) {
+    printf("Saving current best individual as %s\n", output_best_individual);
+    write_individual_to_file(output_best_individual, genes_length, population[evaluation[0].individual_index]);
+  }
 
   // Deallocate memory for population
   free(evaluation);
