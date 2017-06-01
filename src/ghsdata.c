@@ -50,21 +50,6 @@ position2d_t
   return position;
 }
 
-// Create place on heap
-place_t
-*create_place (byte_t x, byte_t y, byte_t visited)
-{
-  place_t *place;
-
-  place = (place_t*) malloc(sizeof(place_t));
-
-  place->position.x = x;
-  place->position.y = y;
-  place->visited = visited;
-
-  return place;
-}
-
 // Init unexplored map
 void
 init_explored_map (byte_t current_map[MAP_SIZE][MAP_SIZE])

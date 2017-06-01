@@ -3,6 +3,7 @@
 #include <time.h>
 #include <ghsdata.h>
 #include <pathsearch.h>
+#include <tspsearch.h>
 #include <rateexploresearch.h>
 #include <smartgoku.h>
 
@@ -133,12 +134,12 @@ init_dragonballs(char *positions)
 static void
 remove_tracked_dragonball (dragonball_t *dragonball)
 {
-  place_t *current;
+  position2d_t *current;
   linkedlistnode_t *tmp, *previous;
 
   // Check if dragonball is the first one
-  current = (place_t*) game.tracked_dragonballs->first_node->data;
-  if ((current->position.x == dragonball->x) && (current->position.y == dragonball->y)) {
+  current = (position2d_t*) game.tracked_dragonballs->first_node->data;
+  if ((current->x == dragonball->x) && (current->y == dragonball->y)) {
     // it is, remove this one
     tmp = ll_remove_first_node(game.tracked_dragonballs);
     free (tmp->data);
@@ -147,8 +148,8 @@ remove_tracked_dragonball (dragonball_t *dragonball)
   }
 
   // Check if dragonball is the last one
-  current = (place_t*) game.tracked_dragonballs->last_node->data;
-  if ((current->position.x == dragonball->x) && (current->position.y == dragonball->y)) {
+  current = (position2d_t*) game.tracked_dragonballs->last_node->data;
+  if ((current->x == dragonball->x) && (current->y == dragonball->y)) {
     tmp = ll_remove_last_node(game.tracked_dragonballs);
     free (tmp->data);
     free (tmp);
@@ -159,9 +160,9 @@ remove_tracked_dragonball (dragonball_t *dragonball)
   previous = game.tracked_dragonballs->first_node;
   tmp = previous->next;
   while (tmp != NULL) {
-    current = (place_t*) tmp->data;
+    current = (position2d_t*) tmp->data;
 
-    if ((current->position.x == dragonball->x) && (current->position.y == dragonball->y)) {
+    if ((current->x == dragonball->x) && (current->y == dragonball->y)) {
       previous->next = tmp->next;
       game.tracked_dragonballs->number_of_elements--;
       free (current);
@@ -178,7 +179,7 @@ remove_tracked_dragonball (dragonball_t *dragonball)
 void
 check_seen_dragonballs()
 {
-  place_t *dragonball_to_catch;
+  position2d_t *dragonball_to_catch;
   byte_t i;
 
   for (i = 0; i < DRAGONBALLS_NUMBER; i++) {
@@ -187,7 +188,7 @@ check_seen_dragonballs()
         game.dragonballs[i].seen = EXPLORED;
 
         // Add to stack
-        dragonball_to_catch = create_place(game.dragonballs[i].x, game.dragonballs[i].y, NOT_EXPLORED);
+        dragonball_to_catch = create_position (game.dragonballs[i].x, game.dragonballs[i].y);
         st_push((void*) dragonball_to_catch, game.seen_dragonballs);
       }
 
@@ -246,7 +247,7 @@ move_goku_down()
 void
 search()
 {
-  place_t *dragonball_to_catch;
+  position2d_t *dragonball_to_catch;
 
   // IDLE means that search is OFF
   if (game.status == IDLE) {
@@ -277,7 +278,7 @@ search()
         st_push(dragonball_to_catch, game.tracked_dragonballs);
         // Perform search
         ps_path_search(game.goku.current_position.x, game.goku.current_position.y,
-            dragonball_to_catch->position.x, dragonball_to_catch->position.y);
+            dragonball_to_catch->x, dragonball_to_catch->y);
       } else {
         // More than one dragonball was seen
         // Add all of them to stack of tracked ones
@@ -287,6 +288,7 @@ search()
         }
         // Perform multiple search algorithm
         printf("Achou mais de uma ao mesmo tempo!\n");
+        tsp_search(game.tracked_dragonballs, &game.goku.current_position);
       }
     } else {
       // There is some dragonball being tracked
@@ -296,6 +298,7 @@ search()
         st_push(dragonball_to_catch, game.tracked_dragonballs);
       }
       // Perform multisearch
+      tsp_search(game.tracked_dragonballs, &game.goku.current_position);
       printf("Já havia uma busca em andamento, mas outra esfera foi localizada! :o\n");
     }
   }
