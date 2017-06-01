@@ -155,10 +155,6 @@ tsp_calculate_heuristic(position2d_t *position, m_stack_t stack)
     return 0;
   }
 
-  if (stack->number_of_elements == 1) {
-    //return tsp_manhatan_distance(position, (position2d_t*) stack->first_node->data);
-  }
-
   // Pop the first element
   current_best = ll_remove_first_node(stack);
   min_distance = tsp_manhatan_distance(position, (position2d_t*) current_best->data);

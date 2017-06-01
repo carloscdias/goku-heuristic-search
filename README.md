@@ -6,6 +6,9 @@ Explore a 2D unknown environment and retrieve the seven dragonballs with the lea
 
 ![Running program](https://raw.githubusercontent.com/carloscdias/goku-heuristic-search/master/images/example.png)
 
+Command used in the presentation to get the 7 dragonballs with a total cost of 1026
+`build/smartgoku -d 1,37,39,36,19,32,2,19,37,14,36,12,22,4 -m build/Mapa01.txt -r`
+
 ## Controls
 
  * `s` turn on/off search
@@ -28,5 +31,5 @@ Explore a 2D unknown environment and retrieve the seven dragonballs with the lea
  * `-m file` or `--map file`, loads a definition map
  * `-d x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,x6,y6,x7,y7` or `--dragonballs x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,x6,y6,x7,y7`, sets the dragonballs position
  * `-r` or `--rate` sets the exploration mode to `min cost explore rate`
- * `-p pathfile` or `--path pathfile` sets the exploration mode to path and expects the given file to be a binary file of positions2d_t to be
+ * `-p pathfile` or `--path pathfile` sets the exploration mode to path and expects the given file to be a binary file of positions2d_t[]
 
