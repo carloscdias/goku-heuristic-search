@@ -287,7 +287,6 @@ search()
           st_push(dragonball_to_catch, game.tracked_dragonballs);
         }
         // Perform multiple search algorithm
-        printf("Achou mais de uma ao mesmo tempo!\n");
         tsp_search(game.tracked_dragonballs, &game.goku.current_position);
       }
     } else {
@@ -299,7 +298,6 @@ search()
       }
       // Perform multisearch
       tsp_search(game.tracked_dragonballs, &game.goku.current_position);
-      printf("Já havia uma busca em andamento, mas outra esfera foi localizada! :o\n");
     }
   }
 }

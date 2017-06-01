@@ -1,6 +1,26 @@
 #include <stdlib.h>
 #include <tspsearch.h>
-#include <stdio.h>
+
+// Static functions declarations
+
+// Helper to create the state
+static tsp_state_t *create_tsp_state(byte_t, byte_t);
+
+// Create a new stack of unvisited places based on the old one and the new position
+static void create_unvisited_places_stack(m_stack_t, m_stack_t, position2d_t*);
+
+// Check if position is in stack
+static byte_t tsp_is_in_stack(position2d_t*, m_stack_t);
+
+// Compare 2 tsp states for equality
+static byte_t compare_tsp_states(void*, void *);
+
+// Simple manhatan distance
+static unsigned int tsp_manhatan_distance(position2d_t*, position2d_t*);
+
+// Heuristic recursion
+static unsigned int tsp_calculate_heuristic(position2d_t*, m_stack_t);
+
 
 // Actions
 action_t tsp_general_node[5]              = {tsp_move_up,   tsp_move_down,
@@ -26,21 +46,6 @@ static tsp_state_t
   tsp_state->places_to_visit = st_create_stack();
 
   return tsp_state;
-}
-
-// helper to destroy a tsp state
-static void
-destroy_tsp_state(tsp_state_t *tsp_state)
-{
-  if (tsp_state->position != NULL) {
-    // Deallocate current position
-    free(tsp_state->position);
-  }
-
-  // Deallocate stack
-  st_destroy_stack(tsp_state->places_to_visit);
-  // Deallcate state
-  free(tsp_state);
 }
 
 // helper to create a stack of unvisited places
@@ -69,18 +74,131 @@ create_unvisited_places_stack (m_stack_t old_stack, m_stack_t new_stack, positio
   }
 }
 
+// Check if given position is in the given stack
+static byte_t
+tsp_is_in_stack(position2d_t *position, m_stack_t stack)
+{
+  linkedlistnode_t *node;
+
+  if (ll_is_empty(stack)) {
+    return NOT_EXPLORED;
+  }
+
+  // Check stack looking for position
+  node = stack->first_node;
+  while (node != NULL) {
+    if (compare_positions(position, (position2d_t*) node->data)) {
+      return EXPLORED;
+    }
+
+    node = node->next;
+  }
+
+  return NOT_EXPLORED;
+}
+
 // Function to compare two tsp_states and returns
 // 1 if they are equals or 0 if they are different
 static byte_t
 compare_tsp_states(void *tsp1, void *tsp2)
 {
   tsp_state_t *state1, *state2;
+  linkedlistnode_t *node;
   
   state1 = (tsp_state_t*) tsp1;
   state2 = (tsp_state_t*) tsp2;
 
-  // Here we have to decide how to tsp states will be compared
-  return compare_positions(state1->position, state2->position) && state1->places_to_visit->number_of_elements == state2->places_to_visit->number_of_elements;
+  // If positions are diferent, they are not equals
+  if (compare_positions(state1->position, state2->position) == NOT_EXPLORED) {
+    return NOT_EXPLORED;
+  }
+
+  // If both are empty, they are equals
+  if (ll_is_empty(state1->places_to_visit) && ll_is_empty(state2->places_to_visit)) {
+    return EXPLORED;
+  }
+
+  // If they have different number of elements in the stack, they are not equals
+  if (state1->places_to_visit->number_of_elements != state2->places_to_visit->number_of_elements) {
+    return NOT_EXPLORED;
+  }
+
+  node = state1->places_to_visit->first_node;
+  while (node != NULL) {
+    // If there is at least one element different, they are differents
+    if (tsp_is_in_stack((position2d_t*) node->data, state2->places_to_visit) == NOT_EXPLORED) {
+      return NOT_EXPLORED;
+    }
+
+    node = node->next;
+  }
+
+  // Otherwise, they are equals
+  return EXPLORED;
+}
+
+// TSP manhatan distance
+static unsigned int
+tsp_manhatan_distance(position2d_t *position1, position2d_t *position2)
+{
+  return (abs (position1->x - position2->x) + abs (position1->y - position2->y));
+}
+
+// Function to calculate the heuristic recursively
+static unsigned int
+tsp_calculate_heuristic(position2d_t *position, m_stack_t stack)
+{
+  linkedlistnode_t *current_best, *tmp;
+  unsigned int min_distance, tmp_distance, i, number_of_nodes;
+
+  if (stack->number_of_elements == 0) {
+    return 0;
+  }
+
+  if (stack->number_of_elements == 1) {
+    //return tsp_manhatan_distance(position, (position2d_t*) stack->first_node->data);
+  }
+
+  // Pop the first element
+  current_best = ll_remove_first_node(stack);
+  min_distance = tsp_manhatan_distance(position, (position2d_t*) current_best->data);
+
+  number_of_nodes = stack->number_of_elements;
+
+  // loop through all nodes
+  for (i = 0; i < number_of_nodes; i++) {
+    tmp = ll_remove_first_node(stack);
+    tmp_distance = tsp_manhatan_distance(position, (position2d_t*) tmp->data);
+    
+    // Change min value and reinsert earlier min node to the end of the linked list
+    if (tmp_distance < min_distance) {
+      min_distance = tmp_distance;
+      ll_insert_last_node(current_best, stack);
+      current_best = tmp;
+    } else {
+      // reinsert node to the end of the list
+      ll_insert_last_node(tmp, stack);
+    }
+  }
+
+  return min_distance + tsp_calculate_heuristic((position2d_t*) current_best->data, stack);
+}
+
+// Helper function to create a node based on x, y and current state
+static node_t
+*tsp_create_node(int x, int y, state_t state)
+{
+  tsp_state_t *current_state, *next_state;
+
+  current_state = (tsp_state_t*) state;
+  next_state    = create_tsp_state(current_state->position->x + x, current_state->position->y + y);
+
+  // generate new stack of visited places, dealing with the new position
+  create_unvisited_places_stack(current_state->places_to_visit,
+                                next_state->places_to_visit,
+                                next_state->position);
+
+  return as_create_node ((state_t) next_state, movement_cost(next_state->position), NULL);
 }
 
 // Push solution to the movements stack
@@ -92,7 +210,6 @@ void
   if (!ll_is_empty (game.movements)) {
     st_clear_stack (game.movements);
   }
-  printf("found a solution for the tsp problem :)\n");
 
   while (solution != NULL) {
     position = create_position (((tsp_state_t*) solution->state)->position->x, ((tsp_state_t*) solution->state)->position->y);
@@ -113,7 +230,6 @@ tsp_search (m_stack_t places_to_visit, position2d_t *current_position)
   // Create a tsp initial state in memory
   initial_state = create_tsp_state(current_position->x, current_position->y);
   create_unvisited_places_stack(places_to_visit, initial_state->places_to_visit, current_position);
-  printf("performing search for the tsp problem :)\n");
 
   // Set the problem conditions
   tsp_problem.initial_state  = initial_state;
@@ -169,68 +285,32 @@ action_t
 }
 
 // Actions
+// Action move up
 node_t
 *tsp_move_up (const state_t state)
 {
-  tsp_state_t *current_state, *next_state;
-
-  current_state = (tsp_state_t*) state;
-  next_state    = create_tsp_state(current_state->position->x, current_state->position->y + 1);
-
-  // generate new stack of visited places, dealing with the new position
-  create_unvisited_places_stack(current_state->places_to_visit,
-                                next_state->places_to_visit,
-                                next_state->position);
-
-  return as_create_node ((state_t) next_state, movement_cost(next_state->position), NULL);
+  return tsp_create_node(0, 1, state);
 }
 
+// Action move down
 node_t
 *tsp_move_down (const state_t state)
 {
-  tsp_state_t *current_state, *next_state;
-
-  current_state = (tsp_state_t*) state;
-  next_state    = create_tsp_state(current_state->position->x, current_state->position->y - 1);
-
-  // generate new stack of visited places, dealing with the new position
-  create_unvisited_places_stack(current_state->places_to_visit,
-                                next_state->places_to_visit,
-                                next_state->position);
-
-  return as_create_node ((state_t) next_state, movement_cost(next_state->position), NULL);
+  return tsp_create_node(0, -1, state);
 }
 
+// Action move left
 node_t
 *tsp_move_left (const state_t state)
 {
-  tsp_state_t *current_state, *next_state;
-
-  current_state = (tsp_state_t*) state;
-  next_state    = create_tsp_state(current_state->position->x - 1, current_state->position->y);
-
-  // generate new stack of visited places, dealing with the new position
-  create_unvisited_places_stack(current_state->places_to_visit,
-                                next_state->places_to_visit,
-                                next_state->position);
-
-  return as_create_node ((state_t) next_state, movement_cost(next_state->position), NULL);
+  return tsp_create_node(-1, 0, state);
 }
 
+// Action move right
 node_t
 *tsp_move_right (const state_t state)
 {
-  tsp_state_t *current_state, *next_state;
-
-  current_state = (tsp_state_t*) state;
-  next_state    = create_tsp_state(current_state->position->x + 1, current_state->position->y);
-
-  // generate new stack of visited places, dealing with the new position
-  create_unvisited_places_stack(current_state->places_to_visit,
-                                next_state->places_to_visit,
-                                next_state->position);
-
-  return as_create_node ((state_t) next_state, movement_cost(next_state->position), NULL);
+  return tsp_create_node(1, 0, state);
 }
 
 // Goal test for this module
@@ -240,10 +320,31 @@ tsp_visited_all_places(problem_t *problem, state_t state)
   return ll_is_empty(((tsp_state_t*) state)->places_to_visit);
 }
 
-// Heuristic for the tsp problem
+// Heuristic for the tsp problem based on the minimum spanning trees
 double
 tsp_heuristic(problem_t *problem, state_t current_state)
 {
-  return 1;
+  tsp_state_t *state;
+  m_stack_t stack_copy;
+  linkedlistnode_t *node;
+  position2d_t *position;
+  unsigned int heuristic;
+
+  state = (tsp_state_t*) current_state;
+
+  // Copy stack
+  stack_copy = st_create_stack();
+  node = state->places_to_visit->first_node;
+  while (node != NULL) {
+    position = create_position(((position2d_t*) node->data)->x, ((position2d_t*) node->data)->y);
+    st_push(position, stack_copy);
+    node = node->next;
+  }
+
+  // Calculate heuristic
+  heuristic = tsp_calculate_heuristic(state->position, stack_copy);
+  st_destroy_stack(stack_copy);
+
+  return heuristic;
 }
 
