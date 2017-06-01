@@ -32,12 +32,6 @@ typedef struct {
   byte_t x, y, seen, caught;
 } dragonball_t;
 
-// Place to be in the world
-typedef struct {
-  position2d_t position;
-  byte_t visited;
-} place_t;
-
 // Searching status
 typedef enum {IDLE = 0, START} status_t;
 
@@ -90,9 +84,6 @@ byte_t compare_positions(void*, void*);
 
 // Create 2D position on heap
 position2d_t *create_position(byte_t, byte_t);
-
-// Create a place to visit on heap
-place_t *create_place(byte_t, byte_t, byte_t);
 
 // Returns a value limited by the map range
 byte_t value_inside_map_range(int);
