@@ -4,6 +4,7 @@
 #include <smartgoku.h>
 #include <ghsgraphics.h>
 #include <getopt.h>
+#include <pathexploresearch.h>
 
 // Init global vars
 game_t game;
@@ -13,34 +14,34 @@ char info[TEXT_BUFFER];
 int main(int argc, char *argv[], char *envp[]) {	
   char c;
   int opts_index;
-  char *dragonballs_text, *token;
+  char *mapfile;
   // Program options
   struct option opts[] = {
     {"map",         required_argument,  0,  'm'},
     {"dragonballs", required_argument,  0,  'd'},
-    {"explore",     required_argument,  0,  'e'},
+    {"path",        required_argument,  0,  'p'},
+    {"rate",        no_argument,        0,  'r'},
     {0,             0,                  0,   0 }
   };
 
+  game.dragonballs_text_positions = NULL;
+
   // Parse arguments
-  while ((c = getopt_long(argc, argv, "m:d:e:", opts, &opts_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "m:d:p:r", opts, &opts_index)) != -1) {
     switch (c)
     {
       case 'm':
-        printf("Sets the map filename here.\n");
+        mapfile = optarg;
         break;
       case 'd':
-        dragonballs_text = strdup(optarg);
-
-        while ((token = strsep(&dragonballs_text, ",")) != NULL) {
-          atoi(token);
-        }
-
-        free(dragonballs_text);
-        while
+        game.dragonballs_text_positions = optarg;
         break;
-      case 'e':
-        printf("Sets explore mode here.\n");
+      case 'r':
+        game.explore_mode = RATE;
+        break;
+      case 'p':
+        game.explore_mode = PATH;
+        pes_init_explore(optarg);
         break;
       case '?':
         printf("Dafuq happened???.\n");
@@ -60,7 +61,7 @@ int main(int argc, char *argv[], char *envp[]) {
   glutCreateWindow("Goku Heuristic Search");
 
   // Init environment
-  init_game("Mapa01.txt", NULL);
+  init_game(mapfile);
   init_opengl();
 
   // OpenGL loop

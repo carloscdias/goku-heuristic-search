@@ -35,6 +35,9 @@ typedef struct {
 // Searching status
 typedef enum {IDLE = 0, START} status_t;
 
+// Explore modes
+typedef enum {PATH, RATE} explore_mode_t;
+
 // Game structure
 typedef struct {
   // Visual options
@@ -67,6 +70,14 @@ typedef struct {
   m_stack_t seen_dragonballs;
   // Now searching dragonbals are placed here
   m_stack_t tracked_dragonballs;
+
+  // Game setups
+  // Save the explore mode used for the session
+  explore_mode_t explore_mode;
+
+  // positions of the dragonballs in text format
+  char *dragonballs_text_positions;
+
 } game_t;
 
 // Global variable with game data

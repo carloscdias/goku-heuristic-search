@@ -13,14 +13,17 @@ obj/%.o: src/%.c
 
 all: smartgoku geneticpath
 
-smartgoku: obj/smartgoku.o obj/ghsgraphics.o obj/agent.o obj/rateexploresearch.o obj/tspsearch.o obj/pathsearch.o obj/astar.o obj/ghsdata.o obj/pqueue.o obj/stack.o obj/linkedlist.o
+smartgoku: obj/smartgoku.o obj/ghsgraphics.o obj/agent.o obj/pathexploresearch.o obj/rateexploresearch.o obj/tspsearch.o obj/pathsearch.o obj/astar.o obj/ghsdata.o obj/pqueue.o obj/stack.o obj/linkedlist.o
 	$(CC) -o build/$@ $^ $(CFLAGS) $(LIBS)
 
-geneticpath: obj/geneticpath.o obj/agent.o obj/rateexploresearch.o obj/tspsearch.o obj/pathsearch.o obj/astar.o obj/ghsdata.o obj/pqueue.o obj/stack.o obj/linkedlist.o
+geneticpath: obj/geneticpath.o obj/agent.o obj/pathexploresearch.o obj/rateexploresearch.o obj/tspsearch.o obj/pathsearch.o obj/astar.o obj/ghsdata.o obj/pqueue.o obj/stack.o obj/linkedlist.o
 	$(CC) -o build/$@ $^ $(CFLAGS) -lpthread 
 
 run:
-	build/smartgoku
+	build/smartgoku -m build/Mapa01.txt -r
+
+run_path:
+	build/smartgoku -m build/Mapa01.txt -p
 
 run_geneticpath:
 	build/geneticpath

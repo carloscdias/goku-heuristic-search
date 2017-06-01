@@ -14,7 +14,7 @@
 extern char info[TEXT_BUFFER];
 
 // Init global variable
-void init_game(char*, char*);
+void init_game(char*);
 
 // Performs the search algorithm
 void search();

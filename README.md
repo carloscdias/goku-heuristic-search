@@ -27,10 +27,6 @@ Explore a 2D unknown environment and retrieve the seven dragonballs with the lea
 
  * `-m file` or `--map file`, loads a definition map
  * `-d x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,x6,y6,x7,y7` or `--dragonballs x1,y1,x2,y2,x3,y3,x4,y4,x5,y5,x6,y6,x7,y7`, sets the dragonballs position
- * `-e mode`, sets the exploration mode. Each exploration mode may contain suboptions
-
-### Explore modes
-
- * `min_cost_explore_rate`, explora o mapa posição à posição, decidindo a próxima posição de acordo com a menor taxa `custo_do_caminho/numero_regioes_exploradas`
- * `path`, segue um caminho pré-determinado de posições que precisam ser visitadas. Esta posição aceita uma subopção `-p file` ou `--path file` para o nome de um arquivo binário contendo as posições que serão utilizadas para o algoritmo. Por padrão, as posições são lidas do arquivo `path.bin`.
+ * `-r` or `--rate` sets the exploration mode to `min cost explore rate`
+ * `-p pathfile` or `--path pathfile` sets the exploration mode to path and expects the given file to be a binary file of positions2d_t to be
 

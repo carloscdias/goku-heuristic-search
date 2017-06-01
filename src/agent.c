@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <ghsdata.h>
 #include <pathsearch.h>
 #include <tspsearch.h>
+#include <pathexploresearch.h>
 #include <rateexploresearch.h>
 #include <smartgoku.h>
 
@@ -14,7 +16,7 @@ static void init_rand();
 static void init_agent(position2d_t*);
 
 // Init dragonballs position
-static void init_dragonballs(char*);
+void init_dragonballs(char*);
 
 // Init rand with current time
 static void
@@ -26,7 +28,7 @@ init_rand()
 
 // Init game global variable
 void
-init_game(char *mapfile, char *pathfile)
+init_game(char *mapfile)
 {
   // init visual configs
   game.show_info           = 1;
@@ -45,7 +47,7 @@ init_game(char *mapfile, char *pathfile)
 
 // Restart game global variable
 void
-restart()
+restart(char *dragonballs_positions)
 {
   // Clear stacks
   st_clear_stack(game.movements);
@@ -57,7 +59,7 @@ restart()
   game.status = IDLE;
 
   // Reinit dragonballs
-  init_dragonballs (NULL);
+  init_dragonballs (game.dragonballs_text_positions);
   
   // Reinit agent goku
   init_agent (NULL);
@@ -110,23 +112,36 @@ init_agent (position2d_t *position)
 }
 
 // Init dragonballs position
-static void
+void
 init_dragonballs(char *positions)
 {
-  byte_t i;
+  byte_t i, position;
+  char *token, *copy;
+
+  // copy string
+  if (positions) {
+    copy = strdup(positions);
+  }
 
   init_rand();
 
-  for (i = 0; i < DRAGONBALLS_NUMBER; i++) {
-    if (positions != NULL && positions[i] != 0) {
-      // dragonballs[i].x = positions[i]->x;
-      // dragonballs[i].y = positions[i]->y;
+  for (i = 0; i < (DRAGONBALLS_NUMBER*2); i++) {
+    if (positions != NULL && ((token = strsep(&copy, ",")) != NULL)) {
+      position = atoi(token);
     } else {
-      game.dragonballs[i].x = (byte_t)(rand() % MAP_SIZE);
-      game.dragonballs[i].y = (byte_t)(rand() % MAP_SIZE);
+      position = (byte_t)(rand() % MAP_SIZE);
     }
 
-    game.dragonballs[i].seen = game.dragonballs[i].caught = 0;
+    if ((i % 2) == 0) {
+      game.dragonballs[(byte_t)(i/2)].seen = game.dragonballs[(int)(i/2)].caught = 0;
+      game.dragonballs[(byte_t)(i/2)].x = position;
+    } else {
+      game.dragonballs[(byte_t)(i/2)].y = position;
+    }
+  }
+
+  if (positions) {
+    free(copy);
   }
 }
 
@@ -264,11 +279,20 @@ search()
 
   // If there isn't any visible dragonball
   if(ll_is_empty(game.movements) && game.seen_dragonballs->number_of_elements == 0) {
-    // Performs search
-    res_explore_search();
+    // Performs explore
+    if (game.explore_mode == RATE){
+      res_explore_search();
+    } else {
+      pes_explore_search();
+    }
   } else if(game.seen_dragonballs->number_of_elements > 0) {
     // Check if any dragonball is already being tracked
     if (game.tracked_dragonballs->number_of_elements == 0) {
+      // Save where goku was if the explore algorithm was path explore
+      if (game.explore_mode == PATH) {
+        pes_save_explore();
+      }
+
       // There isn't dragonballs being tracked
       // Check if only one dragonball was seen now
       if (game.seen_dragonballs->number_of_elements == 1) {

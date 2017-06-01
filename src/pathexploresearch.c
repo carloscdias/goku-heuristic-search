@@ -44,18 +44,18 @@ pes_explore_search()
 
   // Do the movement
   if (position != NULL) {
-    path_search (game.goku.current_position.x, game.goku.current_position.y, position->x, position->y);
+    ps_path_search (game.goku.current_position.x, game.goku.current_position.y, position->x, position->y);
     free(position);
   }
 }
 
 // Save current pursuit
 void pes_save_explore() {
-  if (ll_is_empty(movements)) {
+  if (ll_is_empty(game.movements)) {
     return;
   }
   
-  while (movements->number_of_elements > 1) {
+  while (game.movements->number_of_elements > 1) {
     saved_pursuit = (position2d_t*) st_pop(game.movements);
     free(saved_pursuit);
   }
