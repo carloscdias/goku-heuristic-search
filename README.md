@@ -2,7 +2,7 @@
 
 Explore a 2D unknown environment and retrieve the seven dragonballs with the least cost as possible.
 
-[Link to assingment (in portuguese)](https://github.com/carloscdias/goku-heuristic-search/blob/master/images/assignment.pdf)
+[Link to assignment (in portuguese)](https://github.com/carloscdias/goku-heuristic-search/blob/master/images/assignment.pdf)
 
 ![Running program](https://raw.githubusercontent.com/carloscdias/goku-heuristic-search/master/images/example.png)
 
