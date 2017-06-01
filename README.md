@@ -6,8 +6,8 @@ Explore a 2D unknown environment and retrieve the seven dragonballs with the lea
 
 ![Running program](https://raw.githubusercontent.com/carloscdias/goku-heuristic-search/master/images/example.png)
 
-Command used in the presentation to get the 7 dragonballs with a total cost of 1026
-`build/smartgoku -d 1,37,39,36,19,32,2,19,37,14,36,12,22,4 -m build/Mapa01.txt -r`
+Command used in the presentation to get the 7 dragonballs with a total cost of `1026`
+```build/smartgoku -d 1,37,39,36,19,32,2,19,37,14,36,12,22,4 -m build/Mapa01.txt -r```
 
 ## Controls
 
