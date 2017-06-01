@@ -1,3 +1,5 @@
 *
 !.gitignore
 !Mapa01.txt
+!genetic_path.bin
+!saved_genetic_generation.bin

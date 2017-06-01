@@ -23,10 +23,10 @@ run:
 	build/smartgoku -m build/Mapa01.txt -r
 
 run_path:
-	build/smartgoku -m build/Mapa01.txt -p
+	build/smartgoku -m build/Mapa01.txt -p build/genetic_path.bin
 
 run_geneticpath:
-	build/geneticpath
+	build/geneticpath -g 40 -p 100 -e 10 -m 5.0 -o build/genetic_path.bin build/Mapa01.txt build/saved_genetic_generation.bin
 
 clean:
 	rm obj/*.o

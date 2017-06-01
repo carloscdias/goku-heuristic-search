@@ -8,6 +8,7 @@
 #include <pathsearch.h>
 #include <pthread.h>
 #include <smartgoku.h>
+#include <string.h>
 
 #define NUMBER_OF_ARGUMENTS           2
 
@@ -365,13 +366,123 @@ evaluate(position2d_t **population, const int population_length, int genes_lengt
   print_individual(genes_length, population[evaluation[0].individual_index]);
 }
 
+// Function to generate a new individual based on its parents
+void
+generate_children(position2d_t *child, position2d_t *father,
+                  position2d_t *mother, int genes_length, const double mutation_percentage)
+{
+  byte_t i, half;
+  position2d_t *parent;
+  double gene_mutation;
+  int mutation_array[] = {-5, -4, -3, -2, -1, 1, 2, 3, 4, 5};
+  byte_t mutation_array_length = 10;
+
+  // Simple function that transfers half of the father genes with 
+  // half of the mother genes to the next individual
+
+  half = genes_length / 2;
+
+  for (i = 0; i < genes_length; i++) {
+    if (i < half) {
+      // first half, father genes
+      parent = father;
+    } else {
+      // last half, mother genes
+      parent = mother;
+    }
+
+    // the mutation occurrence is per gene
+    gene_mutation = ((double) rand()) / ((double) RAND_MAX);
+
+    // Mutate gene
+    if (gene_mutation <= mutation_percentage) {
+      // copy similar values to kid, with some mutation
+      child[i].x = value_inside_map_range(parent[i].x + mutation_array[rand() % mutation_array_length]);
+      child[i].y = value_inside_map_range(parent[i].y + mutation_array[rand() % mutation_array_length]);
+    } else {
+      // copy exact parent values to kid
+      child[i].x = parent[i].x;
+      child[i].y = parent[i].y;
+    }
+  }
+
+}
+
+// Gets an index based on a random percentage of ocurrence of an item in the roulette
+unsigned int
+get_random_parent(double *roulette, const int population_length, fitness_t *evaluation)
+{
+  double percentage, percentage_sum;
+  byte_t i;
+
+  percentage = ((double) rand()) / ((double) RAND_MAX);
+  percentage_sum = 0;
+
+  for (i = 0; i < population_length; i++) {
+    percentage_sum += roulette[i];
+
+    // reached the spot in the roulette
+    if (percentage <= percentage_sum) {
+      return evaluation[i].individual_index;
+    }
+  }
+
+  // Default to return the worst individual
+  return evaluation[population_length - 1].individual_index;
+}
+
+
 // function to generate a new population for the next generation
 void
-next_generation(position2d_t ***population, int population_length, int genes_length, fitness_t *evaluation)
+next_generation(position2d_t ***population, const int population_length,
+                const int genes_length, fitness_t *evaluation, 
+                const int elitism_number, const float mutation_percentage)
 {
-  // first, remember to not change first ELITISM_NUMBER individuals of the evaluation array
-  sleep(1);
-  printf("Doing something...\n");
+  position2d_t **next_population, **tmp;
+  byte_t i, index_father, index_mother;
+  unsigned long int fitness_total = 0;
+  double roulette[population_length];
+  
+  // alloc memory for a new generation
+  next_population = create_population (genes_length, population_length);
+
+  // first, remember to pass the first ELITISM_NUMBER individuals to the next generation
+  for (i = 0; i < elitism_number; i++) {
+    memcpy(next_population[i], evaluation[i].individual, genes_length*sizeof(position2d_t));
+  }
+
+  // setup the roulette
+  for (i = 0; i < population_length; i++) {
+    fitness_total += evaluation[i].fitness;
+  }
+
+  // Assign individual percentage in roulette
+  for (i = 0; i < population_length; i++) {
+    roulette[i] = ((double) evaluation[i].fitness) / ((double) fitness_total);
+  }
+
+  // generate 2 children for each pair of parents till the array is filled
+  for (i = elitism_number; i < population_length; i++) {
+    //Select 2 random indexes based on fitness probability
+    index_father = get_random_parent(roulette, population_length, evaluation);
+    index_mother = get_random_parent(roulette, population_length, evaluation);
+
+    // Repeat the process until two different indexes were found
+    while (index_father == index_mother) {
+      index_mother = get_random_parent(roulette, population_length, evaluation);
+    }
+
+    // Generate children
+    generate_children(next_population[i], (*population)[index_father],
+                      (*population)[index_mother], genes_length, mutation_percentage);
+  }
+
+  // Change population array to new one
+  tmp = *population;
+  *population = next_population;
+
+  // Dealloc old population
+  free(tmp);
 }
 
 // Signal handler
@@ -475,6 +586,7 @@ main (int argc, char *argv[])
   // Do the dirty work...
   // Do stuff here!!!
   while (exit_loop != 1) {
+    printf("-- Running generation %d\n", generation);
     // Here we have to evaluate the generated population
     evaluate(population, population_length, genes_length, evaluation);
     // based on the evaluation performed on the fitness process
@@ -482,8 +594,11 @@ main (int argc, char *argv[])
     // select a few for elitism purposes
     // generate childs for the next generation
     // maybe mutate some individual
-    next_generation(&population, population_length, genes_length, evaluation);
-    // maybe print some info about the process...
+    next_generation(&population, population_length,
+                    genes_length, evaluation,
+                    elitism, mutation);
+    // Increments to next generation
+    generation++;
     // repeat the process
   }
 
